@@ -1,70 +1,83 @@
 # Schriften und Icons
 #
 # Outfit (Google Fonts) für Text und Zahlen, Material Design Icons für Symbole.
+# bpp: 4 = Kantenglättung mit 16 Stufen (ohne wirken Schrift und Icons treppig).
 # Jedes Icon, das ein Raum benutzt, muss hier in der passenden Größe stehen,
 # sonst bleibt es leer. Codepoints: https://pictogrammers.com/library/mdi/
 
 font:
   - file: { type: gfonts, family: Outfit, weight: 400 }
     id: font_12
+    bpp: 4
     size: 12
     glyphs: &latin " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~°²³ÄÖÜäöüß·…✓Ø"
 
   - file: { type: gfonts, family: Outfit, weight: 500 }
     id: font_13
+    bpp: 4
     size: 13
     glyphs: *latin
 
   - file: { type: gfonts, family: Outfit, weight: 500 }
     id: font_14
+    bpp: 4
     size: 14
     glyphs: *latin
 
   - file: { type: gfonts, family: Outfit, weight: 600 }
     id: font_14b
+    bpp: 4
     size: 14
     glyphs: *latin
 
   - file: { type: gfonts, family: Outfit, weight: 600 }
     id: font_19
+    bpp: 4
     size: 19
     glyphs: *latin
 
   - file: { type: gfonts, family: Outfit, weight: 600 }
     id: font_20
+    bpp: 4
     size: 20
     glyphs: *latin
 
   - file: { type: gfonts, family: Outfit, weight: 600 }
     id: font_22
+    bpp: 4
     size: 22
     glyphs: *latin
 
   - file: { type: gfonts, family: Outfit, weight: 400 }
     id: font_17
+    bpp: 4
     size: 17
     glyphs: *latin
 
   # Solltemperatur im Drehregler
   - file: { type: gfonts, family: Outfit, weight: 600 }
     id: font_54
+    bpp: 4
     size: 54
     glyphs: "0123456789,.-°"
 
   - file: { type: gfonts, family: Outfit, weight: 400 }
     id: font_26
+    bpp: 4
     size: 26
     glyphs: "°"
 
   # Uhr im Ruhemodus
   - file: { type: gfonts, family: Outfit, weight: 300 }
     id: font_110
+    bpp: 4
     size: 110
     glyphs: "0123456789:-"
 
   # --- Icons ---
   - file: "fonts/materialdesignicons-webfont.ttf"
     id: icons_14
+    bpp: 4
     size: 14
     glyphs: &chip_icons [
       "\U000F050F",  # thermometer
@@ -75,6 +88,7 @@ font:
 
   - file: "fonts/materialdesignicons-webfont.ttf"
     id: icons_18
+    bpp: 4
     size: 18
     glyphs: [
       "\U000F050F",  # thermometer
@@ -88,6 +102,7 @@ font:
 
   - file: "fonts/materialdesignicons-webfont.ttf"
     id: icons_20
+    bpp: 4
     size: 20
     glyphs: [
       "\U000F0143",  # chevron-up
@@ -97,6 +112,7 @@ font:
 
   - file: "fonts/materialdesignicons-webfont.ttf"
     id: icons_22
+    bpp: 4
     size: 22
     glyphs: [
       "\U000F0335",  # lightbulb
@@ -112,6 +128,7 @@ font:
 
   - file: "fonts/materialdesignicons-webfont.ttf"
     id: icons_24
+    bpp: 4
     size: 24
     glyphs: [
       "\U000F0374",  # minus
@@ -123,6 +140,7 @@ font:
   # Licht-Kacheln und Lüfter
   - file: "fonts/materialdesignicons-webfont.ttf"
     id: icons_28
+    bpp: 4
     size: 28
     glyphs: [
       "\U000F0335",  # lightbulb
@@ -137,6 +155,7 @@ font:
 
   - file: "fonts/materialdesignicons-webfont.ttf"
     id: icons_40
+    bpp: 4
     size: 40
     glyphs: [
       "\U000F18FB",  # teddy-bear
