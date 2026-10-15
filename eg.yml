@@ -58,16 +58,16 @@ packages:
   # --- Rollläden ---
   cover_wohnzimmer: !include
     file: tiles/cover.yml
-    vars: { uid: rl_wohnzimmer, entity_id: cover.rolladenaktor_eg_rolladen_eg_wohnzimmer, text: Wohnzimmer }
+    vars: { uid: rl_wohnzimmer, entity_id: cover.rolladenaktor_eg_rolladen_eg_wohnzimmer, text: Wohnzimmer, tall: true }
   cover_esszimmer: !include
     file: tiles/cover.yml
-    vars: { uid: rl_esszimmer, entity_id: cover.rolladenaktor_eg_rolladen_eg_esszimmer, text: Esszimmer }
+    vars: { uid: rl_esszimmer, entity_id: cover.rolladenaktor_eg_rolladen_eg_esszimmer, text: Esszimmer, tall: true }
   cover_schiebetur: !include
     file: tiles/cover.yml
-    vars: { uid: rl_schiebetur, entity_id: cover.rolladenaktor_eg_rolladen_eg_schiebetur, text: Schiebetür }
+    vars: { uid: rl_schiebetur, entity_id: cover.rolladenaktor_eg_rolladen_eg_schiebetur, text: Schiebetür, tall: true }
   cover_kuche: !include
     file: tiles/cover.yml
-    vars: { uid: rl_kuche, entity_id: cover.rolladenaktor_eg_rolladen_eg_kuche, text: Küche }
+    vars: { uid: rl_kuche, entity_id: cover.rolladenaktor_eg_rolladen_eg_kuche, text: Küche, tall: true }
 
   # --- Heizung (Fußbodenheizung Wohnraum) ---
   heating: !include

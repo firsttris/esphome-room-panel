@@ -41,18 +41,18 @@ packages:
   # --- Rollläden ---
   cover_bett: !include
     file: tiles/cover.yml
-    vars: { uid: rl_bett, entity_id: cover.rolladenaktor_og_1_rolladen_og_eltern_bett, text: Am Bett }
+    vars: { uid: rl_bett, entity_id: cover.rolladenaktor_og_1_rolladen_og_eltern_bett, text: Am Bett, tall: true }
   cover_balkon: !include
     file: tiles/cover.yml
-    vars: { uid: rl_balkon, entity_id: cover.rolladenaktor_og_2_rolladen_og_eltern_balkon_2, text: Balkontür }
+    vars: { uid: rl_balkon, entity_id: cover.rolladenaktor_og_2_rolladen_og_eltern_balkon_2, text: Balkontür, tall: true }
   # Vici: links vom Schreibtisch
   cover_vici_tisch: !include
     file: tiles/cover.yml
-    vars: { uid: rl_vici_tisch, entity_id: cover.rolladenaktor_og_2_rolladen_og_vici, text: Vici Tisch }
+    vars: { uid: rl_vici_tisch, entity_id: cover.rolladenaktor_og_2_rolladen_og_vici, text: Vici Tisch, tall: true }
   # Vici: hinter ihr, wenn sie am Schreibtisch sitzt
   cover_vici_hinten: !include
     file: tiles/cover.yml
-    vars: { uid: rl_vici_hinten, entity_id: cover.rolladenaktor_og_2_rolladen_og_vici_tisch, text: Vici hinten }
+    vars: { uid: rl_vici_hinten, entity_id: cover.rolladenaktor_og_2_rolladen_og_vici_tisch, text: Vici hinten, tall: true }
 
   # --- Klima (Daikin) ---
   climate: !include

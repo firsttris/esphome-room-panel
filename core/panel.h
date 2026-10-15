@@ -220,7 +220,11 @@ inline bool light_is_on(lv_obj_t *tile) { return lights[tile].on; }
 // Karte: 0 = Fenster (Kind 0: Sonne, Kind 1: Behang), 1 = Name, 2 = Position,
 //        3 = Fahrt-Hinweis, 4 = Knopfleiste (hoch, stopp, runter)
 // ---------------------------------------------------------------------------
-constexpr int32_t WINDOW_INNER_H = 64;
+// Innenhöhe des Fensters (64 px normal, mehr bei hohen Karten)
+inline int32_t window_inner_h(lv_obj_t *shutter) {
+  int32_t h = lv_obj_get_content_height(lv_obj_get_parent(shutter));
+  return h > 0 ? h : 64;
+}
 
 struct CoverState {
   float pos = NAN;  // 0 = zu, 100 = offen
@@ -319,14 +323,14 @@ inline void cover_render(lv_obj_t *card) {
   }
 
   // Behang: Höhe = Anteil "zu"
+  int32_t full = window_inner_h(shutter);
   int32_t now = lv_obj_get_style_height(shutter, LV_PART_MAIN);
   if (s.dir > 0) {
-    anim(shutter, shutter_cb, now, 0, s.travel_ms * now / WINDOW_INNER_H, lv_anim_path_linear);
+    anim(shutter, shutter_cb, now, 0, s.travel_ms * now / full, lv_anim_path_linear);
   } else if (s.dir < 0) {
-    anim(shutter, shutter_cb, now, WINDOW_INNER_H, s.travel_ms * (WINDOW_INNER_H - now) / WINDOW_INNER_H,
-         lv_anim_path_linear);
+    anim(shutter, shutter_cb, now, full, s.travel_ms * (full - now) / full, lv_anim_path_linear);
   } else if (!std::isnan(s.pos)) {
-    int32_t target = (int32_t) lroundf(WINDOW_INNER_H * (100.0f - s.pos) / 100.0f);
+    int32_t target = (int32_t) lroundf(full * (100.0f - s.pos) / 100.0f);
     anim(shutter, shutter_cb, now, target, 450);
   }
   covers_changed();
@@ -341,7 +345,7 @@ inline void cover_position(lv_obj_t *card, float pos) {
     // Während der Fahrt: Behang auf die gemeldete Position setzen, Fahrt läuft weiter
     lv_obj_t *shutter = child(child(card, 0), 1);
     lv_anim_delete(shutter, shutter_cb);
-    lv_obj_set_height(shutter, (int32_t) lroundf(WINDOW_INNER_H * (100.0f - pos) / 100.0f));
+    lv_obj_set_height(shutter, (int32_t) lroundf(window_inner_h(shutter) * (100.0f - pos) / 100.0f));
   }
   cover_render(card);
 }
@@ -364,7 +368,7 @@ inline void cover_command(lv_obj_t *card, int dir) {
     // Stopp: Behang bleibt, wo er gerade ist
     lv_anim_delete(shutter, shutter_cb);
     int32_t h = lv_obj_get_style_height(shutter, LV_PART_MAIN);
-    s.pos = 100.0f - h * 100.0f / WINDOW_INNER_H;
+    s.pos = 100.0f - h * 100.0f / window_inner_h(shutter);
   }
   if ((dir > 0 && s.pos >= 99) || (dir < 0 && s.pos <= 1))
     dir = 0;

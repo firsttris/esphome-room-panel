@@ -35,7 +35,7 @@ Jede Lampe und jeder Rollladen ist eine Zeile in der Raum-Datei.
 | Seite | Inhalt |
 |---|---|
 | 💡 **Licht** | Kacheln, die beim Einschalten warm aufglühen, mit Welle beim Antippen; „Alle aus" |
-| 🪟 **Rollläden** | Karten mit kleinem Fenster, dessen Behang während der Fahrt mitläuft; ▲ ■ ▼ und „Alle hoch/runter" |
+| 🪟 **Rollläden** | Karten mit kleinem Fenster, dessen Behang während der Fahrt mitläuft; ▲ ■ ▼ und „Alle hoch/runter"; bei bis zu 4 Rollläden hohe Karten (`tall: true`) |
 | ❄️ **Klima** | Drehregler (18–32 °C), sechs Modi mit eigener Farbe, Lüfterstufe mit drehendem Symbol |
 | 🔥 **Heizung** | Alternative zu Klima: Drehregler für ein Thermostat, Zeitplan / Manuell / Aus, Boost, „heizt gerade" |
 
@@ -94,7 +94,7 @@ packages:
 | Baustein | vars |
 |---|---|
 | `tiles/light.yml` | `uid`, `entity_id` (switch/light/input_boolean), `text`, `icon`, optional `compact: true` (flache Kachel, bis zu 6 Lichter) oder `height` (z. B. 294 für zwei hohe Kacheln) |
-| `tiles/cover.yml` | `uid`, `entity_id`, `text`, optional `travel_time` (Sekunden, Standard 30) |
+| `tiles/cover.yml` | `uid`, `entity_id`, `text`, optional `travel_time` (Sekunden, Standard 30), `tall: true` (hohe Karte, bis zu 4 Rollläden) |
 | `tiles/climate.yml` | `entity_id`, `calls_entity` (Sensor mit freien Cloud-Aufrufen) |
 | `tiles/thermostat.yml` | `entity_id`, optional `min_temp` / `max_temp` (Standard 15 / 28); als dritter Reiter im Raum `climate_tab_text: Heizung` und `climate_tab_icon: "\U000F0438"` setzen, neben einer Klimaanlage `page: page_heating`, `tab: 3` und im Raum `tabs: 4` |
 
