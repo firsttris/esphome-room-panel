@@ -65,6 +65,7 @@ jobs:
         run: |
           esphome config mila.yml > /dev/null
           esphome config eg.yml > /dev/null
+          esphome config schlafzimmer.yml > /dev/null
 
       # ESP-IDF, toolchains and the IDF Python env are downloaded to
       # ~/.cache/esphome. That env links to the runner's Python, so the key
@@ -89,3 +90,4 @@ jobs:
         run: |
           esphome compile mila.yml
           esphome compile eg.yml
+          esphome compile schlafzimmer.yml

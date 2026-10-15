@@ -1,0 +1,35 @@
+# Beispielwerte für die Vorschau von schlafzimmer.yml
+
+esphome:
+  on_boot:
+    - priority: -100
+      then:
+        - delay: 300ms
+        - lvgl.widget.hide: loading_overlay
+        - lambda: |-
+            lv_label_set_text(id(clock_label), "21:15");
+            lv_label_set_text(id(sleep_clock), "21:15");
+            lv_label_set_text(id(sleep_date), "Mittwoch, 15. Oktober");
+            id(room_temperature).publish_state(21.2);
+            id(room_humidity).publish_state(52);
+            id(outdoor_temperature).publish_state(11);
+            id(schlafen_ha).publish_state(true);
+            id(vici_ha).publish_state(false);
+            id(rl_bett_ha_state).publish_state("closed");
+            id(rl_bett_ha_position).publish_state(0);
+            id(rl_balkon_ha_state).publish_state("closing");
+            id(rl_balkon_ha_position).publish_state(45);
+            id(rl_vici_tisch_ha_state).publish_state("open");
+            id(rl_vici_tisch_ha_position).publish_state(100);
+            id(rl_vici_hinten_ha_state).publish_state("open");
+            id(rl_vici_hinten_ha_position).publish_state(100);
+            id(ac_ha_mode).publish_state("cool");
+            id(ac_ha_target).publish_state(21.0);
+            id(ac_ha_fan).publish_state("quiet");
+            id(ac_room_temperature).publish_state(21.2);
+            id(ac_calls_left).publish_state(186);
+            id(th_ha_mode).publish_state("auto");
+            id(th_ha_action).publish_state("idle");
+            id(th_ha_preset).publish_state("none");
+            id(th_ha_target).publish_state(19.0);
+            id(th_room_temperature).publish_state(21.2);

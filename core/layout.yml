@@ -167,7 +167,7 @@ lvgl:
                 id: nav_indicator
                 x: 5
                 y: 5
-                width: 144
+                width: ${106 if (tabs | default(3)) == 4 else 144}
                 height: 46
                 radius: 23
                 bg_color: 0x222B3E
@@ -181,34 +181,61 @@ lvgl:
                 clickable: false
             - button:
                 id: nav_btn_0
-                x: 5
+                x: ${5 + 0 * (112 if (tabs | default(3)) == 4 else 149)}
                 y: 5
-                width: 144
+                width: ${106 if (tabs | default(3)) == 4 else 144}
                 height: 46
                 radius: 23
                 bg_opa: TRANSP
                 text_color: 0xFFB547
+                pad_left: 0
+                pad_right: 0
+                layout:
+                  type: flex
+                  flex_flow: ROW
+                  flex_align_main: CENTER
+                  flex_align_cross: CENTER
+                  flex_align_track: CENTER
+                  pad_column: 6
                 widgets:
-                  - label: { x: 22, align: LEFT_MID, text: "\U000F0335", text_font: icons_22 }
-                  - label: { x: 52, align: LEFT_MID, text: "Licht", text_font: font_13 }
+                  - label: { text: "\U000F0335", text_font: icons_22 }
+                  - label: { text: "Licht", text_font: font_13 }
                 on_click:
-                  - lvgl.page.show:
-                      id: page_lights
-                      animation: MOVE_RIGHT
-                      time: 300ms
+                  - if:
+                      condition:
+                        lambda: "return panel::page > 0;"
+                      then:
+                        - lvgl.page.show:
+                            id: page_lights
+                            animation: MOVE_RIGHT
+                            time: 300ms
+                      else:
+                        - lvgl.page.show:
+                            id: page_lights
+                            animation: MOVE_LEFT
+                            time: 300ms
                   - lambda: panel::nav_go(0);
             - button:
                 id: nav_btn_1
-                x: 154
+                x: ${5 + 1 * (112 if (tabs | default(3)) == 4 else 149)}
                 y: 5
-                width: 144
+                width: ${106 if (tabs | default(3)) == 4 else 144}
                 height: 46
                 radius: 23
                 bg_opa: TRANSP
                 text_color: 0x8892A8
+                pad_left: 0
+                pad_right: 0
+                layout:
+                  type: flex
+                  flex_flow: ROW
+                  flex_align_main: CENTER
+                  flex_align_cross: CENTER
+                  flex_align_track: CENTER
+                  pad_column: 6
                 widgets:
-                  - label: { x: 14, align: LEFT_MID, text: "\U000F111C", text_font: icons_22 }
-                  - label: { x: 44, align: LEFT_MID, text: "Rollläden", text_font: font_13 }
+                  - label: { text: "\U000F111C", text_font: icons_22 }
+                  - label: { text: "Rollläden", text_font: font_13 }
                 on_click:
                   - if:
                       condition:
@@ -226,22 +253,77 @@ lvgl:
                   - lambda: panel::nav_go(1);
             - button:
                 id: nav_btn_2
-                x: 303
+                x: ${5 + 2 * (112 if (tabs | default(3)) == 4 else 149)}
                 y: 5
-                width: 144
+                width: ${106 if (tabs | default(3)) == 4 else 144}
                 height: 46
                 radius: 23
                 bg_opa: TRANSP
                 text_color: 0x8892A8
+                pad_left: 0
+                pad_right: 0
+                layout:
+                  type: flex
+                  flex_flow: ROW
+                  flex_align_main: CENTER
+                  flex_align_cross: CENTER
+                  flex_align_track: CENTER
+                  pad_column: 6
                 widgets:
-                  - label: { x: 24, align: LEFT_MID, text: "${climate_tab_icon | default('\U000F001B')}", text_font: icons_22 }
-                  - label: { x: 54, align: LEFT_MID, text: "${climate_tab_text | default('Klima')}", text_font: font_13 }
+                  - label: { text: "${climate_tab_icon | default('\U000F001B')}", text_font: icons_22 }
+                  - label: { text: "${climate_tab_text | default('Klima')}", text_font: font_13 }
                 on_click:
-                  - lvgl.page.show:
-                      id: page_climate
-                      animation: MOVE_LEFT
-                      time: 300ms
+                  - if:
+                      condition:
+                        lambda: "return panel::page > 2;"
+                      then:
+                        - lvgl.page.show:
+                            id: page_climate
+                            animation: MOVE_RIGHT
+                            time: 300ms
+                      else:
+                        - lvgl.page.show:
+                            id: page_climate
+                            animation: MOVE_LEFT
+                            time: 300ms
                   - lambda: panel::nav_go(2);
+            - button:
+                id: nav_btn_3
+                x: ${5 + 3 * (112 if (tabs | default(3)) == 4 else 149)}
+                y: 5
+                width: ${106 if (tabs | default(3)) == 4 else 144}
+                height: 46
+                radius: 23
+                bg_opa: TRANSP
+                text_color: 0x8892A8
+                pad_left: 0
+                pad_right: 0
+                hidden: ${'false' if (tabs | default(3)) == 4 else 'true'}
+                layout:
+                  type: flex
+                  flex_flow: ROW
+                  flex_align_main: CENTER
+                  flex_align_cross: CENTER
+                  flex_align_track: CENTER
+                  pad_column: 6
+                widgets:
+                  - label: { text: "${heating_tab_icon | default('\U000F0438')}", text_font: icons_22 }
+                  - label: { text: "${heating_tab_text | default('Heizung')}", text_font: font_13 }
+                on_click:
+                  - if:
+                      condition:
+                        lambda: "return panel::page > 3;"
+                      then:
+                        - lvgl.page.show:
+                            id: page_heating
+                            animation: MOVE_RIGHT
+                            time: 300ms
+                      else:
+                        - lvgl.page.show:
+                            id: page_heating
+                            animation: MOVE_LEFT
+                            time: 300ms
+                  - lambda: panel::nav_go(3);
 
       # --- Erste Berührung nach dem Abdunkeln: nur aufwecken ---
       - obj:
@@ -487,6 +569,13 @@ lvgl:
                                 entity_id: "${all_covers}"
 
     - id: page_climate
+      styles: page_style
+      pad_left: 0
+      pad_right: 0
+      scrollable: false
+
+    # Vierter Reiter (nur mit tabs: 4 sichtbar), z. B. Heizung neben Klima
+    - id: page_heating
       styles: page_style
       pad_left: 0
       pad_right: 0

@@ -20,6 +20,10 @@ Jede Lampe und jeder Rollladen ist eine Zeile in der Raum-Datei.
 
 <img src="docs/eg/licht.png" width="32%" alt="Licht: sechs flache Kacheln"> <img src="docs/eg/rolllaeden.png" width="32%" alt="Rollläden: vier Karten"> <img src="docs/eg/klima.png" width="32%" alt="Heizung: Drehregler, Zeitplan, Boost">
 
+**Schlafzimmer** (`schlafzimmer.yml`): 2 hohe Licht-Kacheln, 4 Rollläden, Klimaanlage und Fußbodenheizung auf vier Reitern
+
+<img src="docs/schlafzimmer/licht.png" width="24%" alt="Licht: zwei hohe Kacheln"> <img src="docs/schlafzimmer/rolllaeden.png" width="24%" alt="Rollläden: vier Karten"> <img src="docs/schlafzimmer/klima.png" width="24%" alt="Klima: Kühlen, Lüfter leise"> <img src="docs/schlafzimmer/heizung.png" width="24%" alt="Heizung: Zeitplan">
+
 <sub>Screenshots werden bei jeder Änderung automatisch aus der Firmware erzeugt (SDL-Vorschau mit Beispielwerten).</sub>
 
 </div>
@@ -89,12 +93,12 @@ packages:
 
 | Baustein | vars |
 |---|---|
-| `tiles/light.yml` | `uid`, `entity_id` (switch/light/input_boolean), `text`, `icon`, optional `compact: true` (flache Kachel, bis zu 6 Lichter) |
+| `tiles/light.yml` | `uid`, `entity_id` (switch/light/input_boolean), `text`, `icon`, optional `compact: true` (flache Kachel, bis zu 6 Lichter) oder `height` (z. B. 294 für zwei hohe Kacheln) |
 | `tiles/cover.yml` | `uid`, `entity_id`, `text`, optional `travel_time` (Sekunden, Standard 30) |
 | `tiles/climate.yml` | `entity_id`, `calls_entity` (Sensor mit freien Cloud-Aufrufen) |
-| `tiles/thermostat.yml` | `entity_id`, optional `min_temp` / `max_temp` (Standard 15 / 28); im Raum `climate_tab_text: Heizung` und `climate_tab_icon: "\U000F0438"` setzen |
+| `tiles/thermostat.yml` | `entity_id`, optional `min_temp` / `max_temp` (Standard 15 / 28); als dritter Reiter im Raum `climate_tab_text: Heizung` und `climate_tab_icon: "\U000F0438"` setzen, neben einer Klimaanlage `page: page_heating`, `tab: 3` und im Raum `tabs: 4` |
 
-**Platz:** Die Licht-Seite fasst 4 Kacheln (oder 6 mit `compact: true`), die Rollladen-Seite 6 Karten. Pro Raum entweder `climate.yml` oder `thermostat.yml`.
+**Platz:** Die Licht-Seite fasst 4 Kacheln (oder 6 mit `compact: true`), die Rollladen-Seite 6 Karten. Pro Raum `climate.yml` oder `thermostat.yml` auf dem dritten Reiter, mit `tabs: 4` beide (Klima und Heizung).
 **Icons:** Jedes Symbol muss in `core/fonts.yml` in der passenden Größe stehen (Licht-Kacheln: `icons_28`, Raum-Symbol: `icons_24` und `icons_40`).
 
 ## 🖼️ Vorschau am PC
@@ -110,7 +114,8 @@ sh preview/render.sh mila.yml
 ## 🗂️ Aufbau
 
 ```
-mila.yml, eg.yml    Räume: Substitutions + eine Zeile pro Gerät
+mila.yml, eg.yml,
+schlafzimmer.yml    Räume: Substitutions + eine Zeile pro Gerät
 base/               Hardware (Display, Touch), Netzwerk, Hintergrundbeleuchtung
 core/
   layout.yml        Stile, Kopfzeile, Leiste, Seiten, Ruhemodus, Ladebildschirm

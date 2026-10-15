@@ -15,6 +15,8 @@ esphome:
             panel::nav_buttons[0] = id(nav_btn_0);
             panel::nav_buttons[1] = id(nav_btn_1);
             panel::nav_buttons[2] = id(nav_btn_2);
+            panel::nav_buttons[3] = id(nav_btn_3);
+            panel::nav_step = ${112 if (tabs | default(3)) == 4 else 149};
             panel::nav_paint();
             panel::lights_changed();
             panel::covers_changed();

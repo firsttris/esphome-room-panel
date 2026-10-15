@@ -43,15 +43,19 @@ jobs:
 
       - name: Render
         run: |
-          for room in mila eg; do
+          for room in mila eg schlafzimmer; do
             sh preview/render.sh "$room.yml"
           done
 
       - name: Copy to docs
         run: |
-          for room in mila eg; do
+          for room in mila eg schlafzimmer; do
             mkdir -p "docs/$room"
-            cp preview/shots/$room/licht.png preview/shots/$room/rolllaeden.png preview/shots/$room/klima.png "docs/$room/"
+            for shot in licht rolllaeden klima heizung; do
+              if [ -f "preview/shots/$room/$shot.png" ]; then
+                cp "preview/shots/$room/$shot.png" "docs/$room/"
+              fi
+            done
           done
 
       - name: Commit if changed

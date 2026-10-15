@@ -417,7 +417,7 @@ inline bool ac_editing() { return ac.edited_ms != 0 && lv_tick_elaps(ac.edited_m
 inline void ac_touch() { ac.edited_ms = lv_tick_get(); }
 
 inline void nav_paint();
-inline uint32_t page2_color = NAV_NEUTRAL;  // Farbe des dritten Reiters (Klima/Heizung)
+inline uint32_t tab_colors[4] = {AMBER, SKY, NAV_NEUTRAL, NAV_NEUTRAL};  // Farbe je Reiter
 
 inline void ac_color_cb(void *, int32_t v) {
   lv_color_t c = mix(ac.color_from, ac.color_to, v);
@@ -512,8 +512,9 @@ inline void ac_render() {
       if (ms == 0) {
         lv_obj_set_style_transform_rotation(ac.fan_icon, 0, 0);
       } else {
-        lv_obj_set_style_transform_pivot_x(ac.fan_icon, lv_obj_get_width(ac.fan_icon) / 2, 0);
-        lv_obj_set_style_transform_pivot_y(ac.fan_icon, lv_obj_get_height(ac.fan_icon) / 2, 0);
+        // Drehpunkt = Mitte des 32 × 32 großen Symbols (siehe tiles/climate.yml)
+        lv_obj_set_style_transform_pivot_x(ac.fan_icon, 16, 0);
+        lv_obj_set_style_transform_pivot_y(ac.fan_icon, 16, 0);
         lv_anim_t a;
         lv_anim_init(&a);
         lv_anim_set_var(&a, ac.fan_icon);
@@ -526,7 +527,7 @@ inline void ac_render() {
       }
     }
   }
-  page2_color = on ? color : NAV_NEUTRAL;
+  tab_colors[2] = on ? color : NAV_NEUTRAL;
   nav_paint();
 }
 
@@ -545,6 +546,7 @@ struct Thermo {
   bool heating = false;  // hvac_action == heating
   bool boost = false;    // preset_mode == boost
   uint32_t edited_ms = 0;
+  int tab = 2;  // Reiter, auf dem das Thermostat liegt (2 = dritter, 3 = vierter)
   uint32_t color = OFF_GREY, color_from = OFF_GREY, color_to = OFF_GREY;
   lv_obj_t *arc = nullptr, *halo = nullptr, *mode_label = nullptr, *target_label = nullptr;
   lv_obj_t *modes = nullptr, *boost_btn = nullptr, *status_icon = nullptr, *status_text = nullptr;
@@ -630,7 +632,7 @@ inline void th_render() {
   if (th.status_text != nullptr)
     lv_label_set_text(th.status_text, th.heating ? "Heizt gerade" : (off ? "Aus" : "Ruht"));
 
-  page2_color = off ? NAV_NEUTRAL : color;
+  tab_colors[th.tab] = off ? NAV_NEUTRAL : color;
   nav_paint();
 }
 
@@ -639,28 +641,28 @@ inline void th_render() {
 // ---------------------------------------------------------------------------
 inline int page = 0;
 inline lv_obj_t *nav_indicator = nullptr;
-inline lv_obj_t *nav_buttons[3] = {nullptr, nullptr, nullptr};
-constexpr int32_t NAV_X0 = 5, NAV_STEP = 149;
+inline lv_obj_t *nav_buttons[4] = {nullptr, nullptr, nullptr, nullptr};
+constexpr int32_t NAV_X0 = 5;
+inline int32_t nav_step = 149;  // 112 bei vier Reitern
 
 inline void nav_x_cb(void *var, int32_t v) { lv_obj_set_x((lv_obj_t *) var, v); }
 
 inline void nav_paint() {
-  uint32_t colors[3] = {AMBER, SKY, page2_color};
-  for (int i = 0; i < 3; i++) {
+  for (int i = 0; i < 4; i++) {
     if (nav_buttons[i] == nullptr)
       continue;
-    lv_obj_set_style_text_color(nav_buttons[i], lv_color_hex(i == page ? colors[i] : MUTE), 0);
+    lv_obj_set_style_text_color(nav_buttons[i], lv_color_hex(i == page ? tab_colors[i] : MUTE), 0);
   }
   if (nav_indicator != nullptr) {
-    lv_obj_set_style_border_color(nav_indicator, lv_color_hex(colors[page]), 0);
-    lv_obj_set_style_shadow_color(nav_indicator, lv_color_hex(colors[page]), 0);
+    lv_obj_set_style_border_color(nav_indicator, lv_color_hex(tab_colors[page]), 0);
+    lv_obj_set_style_shadow_color(nav_indicator, lv_color_hex(tab_colors[page]), 0);
   }
 }
 
 inline void nav_go(int p) {
   page = p;
   if (nav_indicator != nullptr)
-    anim(nav_indicator, nav_x_cb, lv_obj_get_x(nav_indicator), NAV_X0 + p * NAV_STEP, 420, lv_anim_path_overshoot);
+    anim(nav_indicator, nav_x_cb, lv_obj_get_x(nav_indicator), NAV_X0 + p * nav_step, 420, lv_anim_path_overshoot);
   nav_paint();
 }
 

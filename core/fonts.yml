@@ -139,6 +139,7 @@ font:
       "\U000F0415",  # plus
       "\U000F18FB",  # teddy-bear
       "\U000F02DC",  # home
+      "\U000F0FD2",  # bed-king
     ]
 
   # Licht-Kacheln und Lüfter
@@ -165,4 +166,5 @@ font:
     glyphs: [
       "\U000F18FB",  # teddy-bear
       "\U000F02DC",  # home
+      "\U000F0FD2",  # bed-king
     ]

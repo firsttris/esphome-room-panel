@@ -1,0 +1,65 @@
+# Panel für das Elternschlafzimmer mit Vicis Bereich
+# Guition ESP32-S3-4848S040 (4", 480 × 480)
+
+substitutions:
+  device_name: panel-schlafzimmer
+  friendly_name: Panel Schlafzimmer
+  room_name: Schlafzimmer
+  room_subtitle: "Eltern · Vici"
+  room_icon: "\U000F0FD2"  # bed-king (muss in icons_24 und icons_40 stehen)
+  # Raumtemperatur und Luftfeuchte
+  room_climate: climate.wandthermostat_og_eltern
+  weather_entity: weather.forecast_home
+  # Vier Reiter: Licht, Rollläden, Klima, Heizung
+  tabs: 4
+  # Für "Alle aus" / "Alle hoch" / "Alle runter"
+  all_lights: >-
+    switch.lichtschaltaktor_og_licht_og_eltern,
+    switch.lichtschaltaktor_og_licht_og_vici
+  all_covers: >-
+    cover.rolladenaktor_og_1_rolladen_og_eltern_bett,
+    cover.rolladenaktor_og_2_rolladen_og_eltern_balkon_2,
+    cover.rolladenaktor_og_2_rolladen_og_vici,
+    cover.rolladenaktor_og_2_rolladen_og_vici_tisch
+
+esphome:
+  name: ${device_name}
+  friendly_name: ${friendly_name}
+
+packages:
+  device: !include base/device.yml
+  core: !include core/index.yml
+
+  # --- Licht (zwei hohe Kacheln) ---
+  light_schlafen: !include
+    file: tiles/light.yml
+    vars: { uid: schlafen, entity_id: switch.lichtschaltaktor_og_licht_og_eltern, text: Schlafen, icon: "\U000F0769", height: 294 }
+  light_vici: !include
+    file: tiles/light.yml
+    vars: { uid: vici, entity_id: switch.lichtschaltaktor_og_licht_og_vici, text: Vici, icon: "\U000F0769", height: 294 }
+
+  # --- Rollläden ---
+  cover_bett: !include
+    file: tiles/cover.yml
+    vars: { uid: rl_bett, entity_id: cover.rolladenaktor_og_1_rolladen_og_eltern_bett, text: Am Bett }
+  cover_balkon: !include
+    file: tiles/cover.yml
+    vars: { uid: rl_balkon, entity_id: cover.rolladenaktor_og_2_rolladen_og_eltern_balkon_2, text: Balkontür }
+  # Vici: links vom Schreibtisch
+  cover_vici_tisch: !include
+    file: tiles/cover.yml
+    vars: { uid: rl_vici_tisch, entity_id: cover.rolladenaktor_og_2_rolladen_og_vici, text: Vici Tisch }
+  # Vici: hinter ihr, wenn sie am Schreibtisch sitzt
+  cover_vici_hinten: !include
+    file: tiles/cover.yml
+    vars: { uid: rl_vici_hinten, entity_id: cover.rolladenaktor_og_2_rolladen_og_vici_tisch, text: Vici hinten }
+
+  # --- Klima (Daikin) ---
+  climate: !include
+    file: tiles/climate.yml
+    vars: { entity_id: climate.klima_schlafzimmer, calls_entity: sensor.schlafzimmer_gateway_verbleibende_fur_tag }
+
+  # --- Heizung (Fußbodenheizung) auf dem vierten Reiter ---
+  heating: !include
+    file: tiles/thermostat.yml
+    vars: { entity_id: climate.wandthermostat_og_eltern, page: page_heating, tab: 3 }

@@ -26,5 +26,12 @@ shot licht
 tap 355 180   # Licht "Mitte" antippen
 sleep 1
 shot licht-tippen
-tap 238 439; sleep 1.2; shot rolllaeden
-tap 387 439; sleep 1.2; shot klima
+# Mitte der Reiter unten (drei oder vier Reiter)
+if grep -q '^  tabs: 4' "$ROOM"; then
+  tap 182 439; sleep 1.2; shot rolllaeden
+  tap 294 439; sleep 1.2; shot klima
+  tap 406 439; sleep 1.2; shot heizung
+else
+  tap 238 439; sleep 1.2; shot rolllaeden
+  tap 387 439; sleep 1.2; shot klima
+fi

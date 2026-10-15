@@ -1,13 +1,14 @@
 # Heizungs-Seite für ein Thermostat (z. B. Homematic-Wandthermostat der Fußbodenheizung)
 #
 # Gleicher Drehregler wie bei der Klimaanlage, rechts Zeitplan / Manuell / Aus,
-# Boost und ob gerade geheizt wird. Belegt die Seite page_climate, also nicht
-# zusammen mit tiles/climate.yml im selben Raum verwenden.
+# Boost und ob gerade geheizt wird.
 #
 # vars:
 #   entity_id:  HA-Entität climate.* (Modi auto / heat / off, Preset boost)
 #   min_temp:   untere Grenze des Reglers in °C (Standard 15)
 #   max_temp:   obere Grenze in °C (Standard 28)
+#   page, tab:  Seite und Reiter (Standard page_climate / 2). Neben einer
+#               Klimaanlage: page_heating / 3 und im Raum tabs: 4 setzen.
 #
 # Im Raum zusätzlich setzen, damit der Reiter passt:
 #   climate_tab_text: Heizung
@@ -21,7 +22,7 @@ globals:
 
 lvgl:
   pages:
-    - id: !extend page_climate
+    - id: !extend ${page | default('page_climate')}
       widgets:
         - obj:
             id: th_halo
@@ -280,6 +281,7 @@ script:
     then:
       - lambda: |-
           auto &t = panel::th;
+          t.tab = ${tab | default(2)};
           t.arc = id(th_arc);
           t.halo = id(th_halo);
           t.mode_label = id(th_mode_label);

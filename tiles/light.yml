@@ -6,6 +6,7 @@
 #   text:       Beschriftung
 #   icon:       MDI-Glyph, muss in core/fonts.yml unter icons_28 stehen
 #   compact:    true = flache Kachel (91 px) für drei Reihen, also bis zu 6 Lichter
+#   height:     eigene Höhe, z. B. 294 für zwei hohe Kacheln (nicht zusammen mit compact)
 
 lvgl:
   pages:
@@ -14,7 +15,7 @@ lvgl:
         - button:
             id: ${uid}_tile
             width: 221
-            height: ${91 if compact | default(false) else 142}
+            height: ${height | default(91 if compact | default(false) else 142)}
             radius: 24
             bg_color: 0x182031
             border_width: 1
