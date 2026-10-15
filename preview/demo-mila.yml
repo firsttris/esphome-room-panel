@@ -1,4 +1,4 @@
-# Beispielwerte für die Vorschau (wie im Mockup)
+# Beispielwerte für die Vorschau von mila.yml (wie im Mockup)
 
 esphome:
   on_boot:

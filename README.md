@@ -12,7 +12,13 @@
 Ein Panel pro Raum auf dem [Guition ESP32-S3-4848S040](https://devices.esphome.io/devices/guition-esp32-s3-4848s040/) (480 × 480).
 Jede Lampe und jeder Rollladen ist eine Zeile in der Raum-Datei.
 
-<img src="docs/licht.png" width="32%" alt="Licht: Kacheln, eingeschaltete glühen warm"> <img src="docs/rolllaeden.png" width="32%" alt="Rollläden: Karten mit Fenster, Behang fährt mit"> <img src="docs/klima.png" width="32%" alt="Klima: Drehregler, Modi und Lüfter">
+**Kinderzimmer Mila** (`mila.yml`): 4 Lichter, 6 Rollläden, Klimaanlage
+
+<img src="docs/mila/licht.png" width="32%" alt="Licht: Kacheln, eingeschaltete glühen warm"> <img src="docs/mila/rolllaeden.png" width="32%" alt="Rollläden: Karten mit Fenster, Behang fährt mit"> <img src="docs/mila/klima.png" width="32%" alt="Klima: Drehregler, Modi und Lüfter">
+
+**Erdgeschoss** (`eg.yml`): 6 Lichter in flachen Kacheln, 4 Rollläden, Fußbodenheizung
+
+<img src="docs/eg/licht.png" width="32%" alt="Licht: sechs flache Kacheln"> <img src="docs/eg/rolllaeden.png" width="32%" alt="Rollläden: vier Karten"> <img src="docs/eg/klima.png" width="32%" alt="Heizung: Drehregler, Zeitplan, Boost">
 
 <sub>Screenshots werden bei jeder Änderung automatisch aus der Firmware erzeugt (SDL-Vorschau mit Beispielwerten).</sub>
 
@@ -27,6 +33,7 @@ Jede Lampe und jeder Rollladen ist eine Zeile in der Raum-Datei.
 | 💡 **Licht** | Kacheln, die beim Einschalten warm aufglühen, mit Welle beim Antippen; „Alle aus" |
 | 🪟 **Rollläden** | Karten mit kleinem Fenster, dessen Behang während der Fahrt mitläuft; ▲ ■ ▼ und „Alle hoch/runter" |
 | ❄️ **Klima** | Drehregler (18–32 °C), sechs Modi mit eigener Farbe, Lüfterstufe mit drehendem Symbol |
+| 🔥 **Heizung** | Alternative zu Klima: Drehregler für ein Thermostat, Zeitplan / Manuell / Aus, Boost, „heizt gerade" |
 
 Außerdem:
 
@@ -82,17 +89,18 @@ packages:
 
 | Baustein | vars |
 |---|---|
-| `tiles/light.yml` | `uid`, `entity_id` (switch/light/input_boolean), `text`, `icon`, optional `height` |
+| `tiles/light.yml` | `uid`, `entity_id` (switch/light/input_boolean), `text`, `icon`, optional `compact: true` (flache Kachel, bis zu 6 Lichter) |
 | `tiles/cover.yml` | `uid`, `entity_id`, `text`, optional `travel_time` (Sekunden, Standard 30) |
 | `tiles/climate.yml` | `entity_id`, `calls_entity` (Sensor mit freien Cloud-Aufrufen) |
+| `tiles/thermostat.yml` | `entity_id`, optional `min_temp` / `max_temp` (Standard 15 / 28); im Raum `climate_tab_text: Heizung` und `climate_tab_icon: "\U000F0438"` setzen |
 
-**Platz:** Die Licht-Seite fasst 4 Kacheln, die Rollladen-Seite 6 Karten.
+**Platz:** Die Licht-Seite fasst 4 Kacheln (oder 6 mit `compact: true`), die Rollladen-Seite 6 Karten. Pro Raum entweder `climate.yml` oder `thermostat.yml`.
 **Icons:** Jedes Symbol muss in `core/fonts.yml` in der passenden Größe stehen (Licht-Kacheln: `icons_28`, Raum-Symbol: `icons_24` und `icons_40`).
 
 ## 🖼️ Vorschau am PC
 
-Die Oberfläche lässt sich ohne Display als SDL-Fenster bauen, mit Beispielwerten aus `preview/demo.yml`.
-`preview/render.sh` baut die Vorschau, tippt die Seiten durch und legt Screenshots in `preview/shots/` ab
+Die Oberfläche lässt sich ohne Display als SDL-Fenster bauen, mit Beispielwerten aus `preview/demo-<raum>.yml`.
+`preview/render.sh` baut die Vorschau, tippt die Seiten durch und legt Screenshots in `preview/shots/<raum>/` ab
 (braucht ESPHome mit `libsdl2-dev`, `xvfb`, `imagemagick` und `xdotool`):
 
 ```bash
@@ -102,7 +110,7 @@ sh preview/render.sh mila.yml
 ## 🗂️ Aufbau
 
 ```
-mila.yml            Raum: Substitutions + eine Zeile pro Gerät
+mila.yml, eg.yml    Räume: Substitutions + eine Zeile pro Gerät
 base/               Hardware (Display, Touch), Netzwerk, Hintergrundbeleuchtung
 core/
   layout.yml        Stile, Kopfzeile, Leiste, Seiten, Ruhemodus, Ladebildschirm
@@ -113,7 +121,8 @@ preview/            SDL-Vorschau, Beispielwerte, Screenshot-Skript
 tiles/
   light.yml         Licht-Kachel
   cover.yml         Rollladen-Karte
-  climate.yml       Klima-Seite
+  climate.yml       Klima-Seite (Klimaanlage)
+  thermostat.yml    Heizungs-Seite (Thermostat)
 ```
 
 ## 🙏 Danke

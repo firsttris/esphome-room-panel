@@ -3,13 +3,15 @@
 # Aufruf im Repo-Verzeichnis:  sh preview/render.sh mila.yml
 set -e
 ROOM=${1:-mila.yml}
-OUT=preview/shots
+NAME=$(basename "$ROOM" .yml)
+OUT=preview/shots/$NAME
 mkdir -p "$OUT"
 # Vorschau-Konfiguration: Hardware durch SDL ersetzen, Beispielwerte dazu
-sed -e 's#device: !include base/device.yml#device: !include preview/sdl.yml\n  demo: !include preview/demo.yml#' \
+sed -e 's#device: !include base/device.yml#device: !include preview/sdl.yml\n  demo: !include preview/demo-'"$NAME"'.yml#' \
     -e 's#^\(  device_name: .*\)$#\1-preview#' "$ROOM" > .preview.yml
 esphome compile .preview.yml
-BIN=$(find .esphome/build -path '*preview*' -name program -type f | head -1)
+DEV=$(sed -n 's/^  device_name: //p' "$ROOM")-preview
+BIN=.esphome/build/$DEV/.pioenvs/$DEV/program
 Xvfb :99 -screen 0 480x480x24 >/dev/null 2>&1 &
 XVFB=$!
 export DISPLAY=:99

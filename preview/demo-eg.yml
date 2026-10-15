@@ -1,0 +1,34 @@
+# Beispielwerte für die Vorschau von eg.yml
+
+esphome:
+  on_boot:
+    - priority: -100
+      then:
+        - delay: 300ms
+        - lvgl.widget.hide: loading_overlay
+        - lambda: |-
+            lv_label_set_text(id(clock_label), "18:47");
+            lv_label_set_text(id(sleep_clock), "18:47");
+            lv_label_set_text(id(sleep_date), "Mittwoch, 15. Oktober");
+            id(room_temperature).publish_state(20.8);
+            id(room_humidity).publish_state(58);
+            id(outdoor_temperature).publish_state(12);
+            id(wohnzimmer_ha).publish_state(true);
+            id(esszimmer_ha).publish_state(false);
+            id(kuche_ha).publish_state(true);
+            id(kucheninsel_ha).publish_state(true);
+            id(flur_ha).publish_state(false);
+            id(treppe_ha).publish_state(false);
+            id(rl_wohnzimmer_ha_state).publish_state("open");
+            id(rl_wohnzimmer_ha_position).publish_state(100);
+            id(rl_esszimmer_ha_state).publish_state("open");
+            id(rl_esszimmer_ha_position).publish_state(100);
+            id(rl_schiebetur_ha_state).publish_state("closing");
+            id(rl_schiebetur_ha_position).publish_state(60);
+            id(rl_kuche_ha_state).publish_state("closed");
+            id(rl_kuche_ha_position).publish_state(0);
+            id(th_ha_mode).publish_state("auto");
+            id(th_ha_action).publish_state("heating");
+            id(th_ha_preset).publish_state("none");
+            id(th_ha_target).publish_state(21.0);
+            id(th_room_temperature).publish_state(20.8);

@@ -417,6 +417,7 @@ inline bool ac_editing() { return ac.edited_ms != 0 && lv_tick_elaps(ac.edited_m
 inline void ac_touch() { ac.edited_ms = lv_tick_get(); }
 
 inline void nav_paint();
+inline uint32_t page2_color = NAV_NEUTRAL;  // Farbe des dritten Reiters (Klima/Heizung)
 
 inline void ac_color_cb(void *, int32_t v) {
   lv_color_t c = mix(ac.color_from, ac.color_to, v);
@@ -525,6 +526,111 @@ inline void ac_render() {
       }
     }
   }
+  page2_color = on ? color : NAV_NEUTRAL;
+  nav_paint();
+}
+
+// ---------------------------------------------------------------------------
+// Thermostat (z. B. Fußbodenheizung über Homematic)
+// ---------------------------------------------------------------------------
+constexpr int TH_MODE_COUNT = 3;
+inline const char *const TH_KEYS[TH_MODE_COUNT] = {"auto", "heat", "off"};
+inline const char *const TH_NAMES[TH_MODE_COUNT] = {"Zeitplan", "Manuell", "Aus"};
+inline const uint32_t TH_COLORS[TH_MODE_COUNT] = {0xFFA36B, 0xFF7A45, 0x6B7488};
+constexpr uint32_t HEAT = 0xFF7A45, HEAT_SOFT = 0xFFA36B, OFF_GREY = 0x4A546A;
+
+struct Thermo {
+  int mode = 0;
+  float target = NAN;
+  bool heating = false;  // hvac_action == heating
+  bool boost = false;    // preset_mode == boost
+  uint32_t edited_ms = 0;
+  uint32_t color = OFF_GREY, color_from = OFF_GREY, color_to = OFF_GREY;
+  lv_obj_t *arc = nullptr, *halo = nullptr, *mode_label = nullptr, *target_label = nullptr;
+  lv_obj_t *modes = nullptr, *boost_btn = nullptr, *status_icon = nullptr, *status_text = nullptr;
+};
+inline Thermo th;
+
+inline int th_mode_index(const std::string &s) {
+  for (int i = 0; i < TH_MODE_COUNT; i++)
+    if (s == TH_KEYS[i])
+      return i;
+  return 0;
+}
+
+inline bool th_editing() { return th.edited_ms != 0 && lv_tick_elaps(th.edited_ms) < 6000; }
+inline void th_touch() { th.edited_ms = lv_tick_get(); }
+
+inline void th_color_cb(void *, int32_t v) {
+  lv_color_t c = mix(th.color_from, th.color_to, v);
+  if (th.arc != nullptr) {
+    lv_obj_set_style_arc_color(th.arc, c, LV_PART_INDICATOR);
+    lv_obj_set_style_border_color(th.arc, c, LV_PART_KNOB);
+  }
+  if (th.halo != nullptr)
+    lv_obj_set_style_bg_color(th.halo, c, 0);
+  if (th.mode_label != nullptr)
+    lv_obj_set_style_text_color(th.mode_label, th.mode == 2 ? lv_color_hex(MUTE) : c, 0);
+}
+
+// Knopf hervorheben: Kinder 0 = Icon, 1 = Text (weitere Kinder bleiben unverändert)
+inline void paint_choice(lv_obj_t *b, bool sel, uint32_t c) {
+  lv_obj_set_style_border_color(b, lv_color_hex(sel ? c : LINE), 0);
+  lv_obj_set_style_bg_color(b, sel ? mix(CARD, c, 45) : lv_color_hex(CARD), 0);
+  lv_color_t tc = lv_color_hex(sel ? c : MUTE);
+  lv_obj_set_style_text_color(child(b, 0), tc, 0);
+  lv_obj_set_style_text_color(child(b, 1), tc, 0);
+}
+
+inline void th_render() {
+  bool off = th.mode == 2;
+  bool warm = th.heating || th.boost;
+  uint32_t color = off ? OFF_GREY : (warm ? HEAT : HEAT_SOFT);
+
+  if (color != th.color) {
+    th.color_from = th.color;
+    th.color_to = color;
+    th.color = color;
+    lv_anim_delete(&th, th_color_cb);
+    lv_anim_t a;
+    lv_anim_init(&a);
+    lv_anim_set_var(&a, &th);
+    lv_anim_set_exec_cb(&a, th_color_cb);
+    lv_anim_set_values(&a, 0, 255);
+    lv_anim_set_duration(&a, 450);
+    lv_anim_start(&a);
+  } else {
+    th_color_cb(&th, 255);
+  }
+  if (th.halo != nullptr)
+    anim(th.halo, halo_cb, lv_obj_get_style_bg_opa(th.halo, LV_PART_MAIN), !off && warm ? 34 : 0, 450);
+
+  if (th.mode_label != nullptr) {
+    const char *text = off ? "Aus · Ziel"
+                           : th.boost ? "Boost aktiv"
+                                      : th.heating ? "Heizt auf" : (th.mode == 0 ? "Zeitplan · Ziel" : "Manuell · Ziel");
+    lv_label_set_text(th.mode_label, text);
+  }
+  if (th.target_label != nullptr)
+    set_temp(th.target_label, th.target, "");
+  if (th.arc != nullptr && !std::isnan(th.target) && !lv_obj_has_state(th.arc, LV_STATE_PRESSED))
+    lv_arc_set_value(th.arc, (int32_t) lroundf(th.target * 2));
+
+  if (th.modes != nullptr) {
+    for (int i = 0; i < TH_MODE_COUNT; i++) {
+      lv_obj_t *b = child(th.modes, i);
+      if (b != nullptr)
+        paint_choice(b, i == th.mode, TH_COLORS[i]);
+    }
+  }
+  if (th.boost_btn != nullptr)
+    paint_choice(th.boost_btn, th.boost, HEAT);
+  if (th.status_icon != nullptr)
+    lv_obj_set_style_text_color(th.status_icon, lv_color_hex(th.heating ? HEAT : MUTE), 0);
+  if (th.status_text != nullptr)
+    lv_label_set_text(th.status_text, th.heating ? "Heizt gerade" : (off ? "Aus" : "Ruht"));
+
+  page2_color = off ? NAV_NEUTRAL : color;
   nav_paint();
 }
 
@@ -539,7 +645,7 @@ constexpr int32_t NAV_X0 = 5, NAV_STEP = 149;
 inline void nav_x_cb(void *var, int32_t v) { lv_obj_set_x((lv_obj_t *) var, v); }
 
 inline void nav_paint() {
-  uint32_t colors[3] = {AMBER, SKY, ac.mode == 0 ? NAV_NEUTRAL : ac.color_to};
+  uint32_t colors[3] = {AMBER, SKY, page2_color};
   for (int i = 0; i < 3; i++) {
     if (nav_buttons[i] == nullptr)
       continue;

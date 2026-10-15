@@ -1,0 +1,75 @@
+# Panel für das Erdgeschoss: Wohnen, Essen, Küche
+# Guition ESP32-S3-4848S040 (4", 480 × 480)
+
+substitutions:
+  device_name: panel-eg
+  friendly_name: Panel EG
+  room_name: Erdgeschoss
+  room_subtitle: "Wohnen · Essen · Küche"
+  room_icon: "\U000F02DC"  # home (muss in icons_24 und icons_40 stehen)
+  # Raumtemperatur und Luftfeuchte
+  room_climate: climate.wandthermostat_eg_wohnraum
+  weather_entity: weather.forecast_home
+  # Dritter Reiter: Heizung statt Klima (bis die Klimaanlage kommt)
+  climate_tab_text: Heizung
+  climate_tab_icon: "\U000F0438"  # radiator
+  # Für "Alle aus" / "Alle hoch" / "Alle runter"
+  all_lights: >-
+    switch.lichtschaltaktor_eg_licht_eg_wohnzimmer,
+    switch.lichtschaltaktor_eg_licht_eg_esszimmer,
+    switch.lichtschaltaktor_eg_licht_eg_kuche,
+    switch.lichtschaltaktor_eg_licht_eg_kucheninsel,
+    switch.lichtschaltaktor_eg_licht_eg_flur,
+    switch.lichtschaltaktor_eg_licht_eg_treppe
+  all_covers: >-
+    cover.rolladenaktor_eg_rolladen_eg_wohnzimmer,
+    cover.rolladenaktor_eg_rolladen_eg_esszimmer,
+    cover.rolladenaktor_eg_rolladen_eg_schiebetur,
+    cover.rolladenaktor_eg_rolladen_eg_kuche
+
+esphome:
+  name: ${device_name}
+  friendly_name: ${friendly_name}
+
+packages:
+  device: !include base/device.yml
+  core: !include core/index.yml
+
+  # --- Licht (6 flache Kacheln in drei Reihen) ---
+  light_wohnzimmer: !include
+    file: tiles/light.yml
+    vars: { uid: wohnzimmer, entity_id: switch.lichtschaltaktor_eg_licht_eg_wohnzimmer, text: Wohnzimmer, icon: "\U000F0769", compact: true }
+  light_esszimmer: !include
+    file: tiles/light.yml
+    vars: { uid: esszimmer, entity_id: switch.lichtschaltaktor_eg_licht_eg_esszimmer, text: Esszimmer, icon: "\U000F0769", compact: true }
+  light_kuche: !include
+    file: tiles/light.yml
+    vars: { uid: kuche, entity_id: switch.lichtschaltaktor_eg_licht_eg_kuche, text: Küche, icon: "\U000F0769", compact: true }
+  light_kucheninsel: !include
+    file: tiles/light.yml
+    vars: { uid: kucheninsel, entity_id: switch.lichtschaltaktor_eg_licht_eg_kucheninsel, text: Kücheninsel, icon: "\U000F1051", compact: true }
+  light_flur: !include
+    file: tiles/light.yml
+    vars: { uid: flur, entity_id: switch.lichtschaltaktor_eg_licht_eg_flur, text: Flur, icon: "\U000F091D", compact: true }
+  light_treppe: !include
+    file: tiles/light.yml
+    vars: { uid: treppe, entity_id: switch.lichtschaltaktor_eg_licht_eg_treppe, text: Treppe, icon: "\U000F04CD", compact: true }
+
+  # --- Rollläden ---
+  cover_wohnzimmer: !include
+    file: tiles/cover.yml
+    vars: { uid: rl_wohnzimmer, entity_id: cover.rolladenaktor_eg_rolladen_eg_wohnzimmer, text: Wohnzimmer }
+  cover_esszimmer: !include
+    file: tiles/cover.yml
+    vars: { uid: rl_esszimmer, entity_id: cover.rolladenaktor_eg_rolladen_eg_esszimmer, text: Esszimmer }
+  cover_schiebetur: !include
+    file: tiles/cover.yml
+    vars: { uid: rl_schiebetur, entity_id: cover.rolladenaktor_eg_rolladen_eg_schiebetur, text: Schiebetür }
+  cover_kuche: !include
+    file: tiles/cover.yml
+    vars: { uid: rl_kuche, entity_id: cover.rolladenaktor_eg_rolladen_eg_kuche, text: Küche }
+
+  # --- Heizung (Fußbodenheizung Wohnraum) ---
+  heating: !include
+    file: tiles/thermostat.yml
+    vars: { entity_id: climate.wandthermostat_eg_wohnraum }

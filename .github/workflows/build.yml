@@ -62,7 +62,9 @@ jobs:
           EOS
 
       - name: Validate config
-        run: esphome config mila.yml > /dev/null
+        run: |
+          esphome config mila.yml > /dev/null
+          esphome config eg.yml > /dev/null
 
       # ESP-IDF, toolchains and the IDF Python env are downloaded to
       # ~/.cache/esphome. That env links to the runner's Python, so the key
@@ -84,4 +86,6 @@ jobs:
           restore-keys: esphome-build-${{ runner.os }}-py${{ steps.python.outputs.python-version }}-${{ steps.esphome.outputs.version }}-
 
       - name: Compile
-        run: esphome compile mila.yml
+        run: |
+          esphome compile mila.yml
+          esphome compile eg.yml

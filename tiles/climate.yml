@@ -173,6 +173,8 @@ lvgl:
                   border_width: 1
                   border_color: 0x2C3650
                   text_color: 0x8892A8
+                  pad_left: 2
+                  pad_right: 2
                   layout:
                     type: flex
                     flex_flow: COLUMN
@@ -180,43 +182,43 @@ lvgl:
                     flex_align_cross: CENTER
                     pad_row: 1
                   widgets:
-                    - label: { text: "\U000F0425", text_font: icons_22 }
-                    - label: { text: "Aus", text_font: font_12 }
+                    - label: { text: "\U000F0425", text_font: icons_22, width: 100%, text_align: CENTER }
+                    - label: { text: "Aus", text_font: font_12, width: 100%, text_align: CENTER }
                   on_click:
                     - script.execute: { id: ac_set_mode, mode: 0 }
               - button:
                   <<: *mode_button
                   widgets:
-                    - label: { text: "\U000F0238", text_font: icons_22 }
-                    - label: { text: "Heizen", text_font: font_12 }
+                    - label: { text: "\U000F0238", text_font: icons_22, width: 100%, text_align: CENTER }
+                    - label: { text: "Heizen", text_font: font_12, width: 100%, text_align: CENTER }
                   on_click:
                     - script.execute: { id: ac_set_mode, mode: 1 }
               - button:
                   <<: *mode_button
                   widgets:
-                    - label: { text: "\U000F0717", text_font: icons_22 }
-                    - label: { text: "Kühlen", text_font: font_12 }
+                    - label: { text: "\U000F0717", text_font: icons_22, width: 100%, text_align: CENTER }
+                    - label: { text: "Kühlen", text_font: font_12, width: 100%, text_align: CENTER }
                   on_click:
                     - script.execute: { id: ac_set_mode, mode: 2 }
               - button:
                   <<: *mode_button
                   widgets:
-                    - label: { text: "\U000F1A79", text_font: icons_22 }
-                    - label: { text: "Auto", text_font: font_12 }
+                    - label: { text: "\U000F1A79", text_font: icons_22, width: 100%, text_align: CENTER }
+                    - label: { text: "Auto", text_font: font_12, width: 100%, text_align: CENTER }
                   on_click:
                     - script.execute: { id: ac_set_mode, mode: 3 }
               - button:
                   <<: *mode_button
                   widgets:
-                    - label: { text: "\U000F058C", text_font: icons_22 }
-                    - label: { text: "Trocken", text_font: font_12 }
+                    - label: { text: "\U000F058C", text_font: icons_22, width: 100%, text_align: CENTER }
+                    - label: { text: "Trocken", text_font: font_12, width: 100%, text_align: CENTER }
                   on_click:
                     - script.execute: { id: ac_set_mode, mode: 4 }
               - button:
                   <<: *mode_button
                   widgets:
-                    - label: { text: "\U000F0210", text_font: icons_22 }
-                    - label: { text: "Lüften", text_font: font_12 }
+                    - label: { text: "\U000F0210", text_font: icons_22, width: 100%, text_align: CENTER }
+                    - label: { text: "Lüften", text_font: font_12, width: 100%, text_align: CENTER }
                   on_click:
                     - script.execute: { id: ac_set_mode, mode: 5 }
 

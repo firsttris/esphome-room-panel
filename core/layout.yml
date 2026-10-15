@@ -52,6 +52,8 @@ lvgl:
       bg_color: 0x182031
       border_width: 1
       border_color: 0x2C3650
+      pad_top: 0
+      pad_bottom: 0
       pad_left: 12
       pad_right: 14
       pad_column: 6
@@ -232,8 +234,8 @@ lvgl:
                 bg_opa: TRANSP
                 text_color: 0x8892A8
                 widgets:
-                  - label: { x: 24, align: LEFT_MID, text: "\U000F001B", text_font: icons_22 }
-                  - label: { x: 54, align: LEFT_MID, text: "Klima", text_font: font_13 }
+                  - label: { x: 24, align: LEFT_MID, text: "${climate_tab_icon | default('\U000F001B')}", text_font: icons_22 }
+                  - label: { x: 54, align: LEFT_MID, text: "${climate_tab_text | default('Klima')}", text_font: font_13 }
                 on_click:
                   - lvgl.page.show:
                       id: page_climate
@@ -394,6 +396,7 @@ lvgl:
                     type: flex
                     flex_flow: ROW
                     flex_align_cross: CENTER
+                    flex_align_track: CENTER
                   widgets:
                     - label: { text: "\U000F12CD", text_font: icons_18 }
                     - label: { text: "Alle aus" }
@@ -451,6 +454,7 @@ lvgl:
                           type: flex
                           flex_flow: ROW
                           flex_align_cross: CENTER
+                          flex_align_track: CENTER
                         widgets:
                           - label: { text: "\U000F0795", text_font: icons_18 }
                           - label: { text: "Alle" }
@@ -469,6 +473,7 @@ lvgl:
                           type: flex
                           flex_flow: ROW
                           flex_align_cross: CENTER
+                          flex_align_track: CENTER
                         widgets:
                           - label: { text: "\U000F0792", text_font: icons_18 }
                           - label: { text: "Alle" }

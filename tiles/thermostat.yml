@@ -1,0 +1,416 @@
+# Heizungs-Seite für ein Thermostat (z. B. Homematic-Wandthermostat der Fußbodenheizung)
+#
+# Gleicher Drehregler wie bei der Klimaanlage, rechts Zeitplan / Manuell / Aus,
+# Boost und ob gerade geheizt wird. Belegt die Seite page_climate, also nicht
+# zusammen mit tiles/climate.yml im selben Raum verwenden.
+#
+# vars:
+#   entity_id:  HA-Entität climate.* (Modi auto / heat / off, Preset boost)
+#   min_temp:   untere Grenze des Reglers in °C (Standard 15)
+#   max_temp:   obere Grenze in °C (Standard 28)
+#
+# Im Raum zusätzlich setzen, damit der Reiter passt:
+#   climate_tab_text: Heizung
+#   climate_tab_icon: "\U000F0438"   # radiator
+
+globals:
+  - id: th_pending
+    type: int  # Bitmaske: 1 = Modus, 2 = Temperatur, 4 = Boost
+    restore_value: no
+    initial_value: "0"
+
+lvgl:
+  pages:
+    - id: !extend page_climate
+      widgets:
+        - obj:
+            id: th_halo
+            x: 37
+            y: 39
+            width: 188
+            height: 188
+            radius: 94
+            bg_color: 0x4A546A
+            bg_opa: 0%
+            border_width: 0
+            clickable: false
+
+        - arc:
+            id: th_arc
+            x: 6
+            y: 8
+            width: 250
+            height: 250
+            rotation: 135
+            start_angle: 0
+            end_angle: 270
+            min_value: ${2 * (min_temp | default(15))}
+            max_value: ${2 * (max_temp | default(28))}
+            value: 40
+            adjustable: true
+            arc_width: 18
+            arc_color: 0x222B3E
+            arc_rounded: true
+            pad_all: 6
+            indicator:
+              arc_width: 18
+              arc_color: 0x4A546A
+              arc_rounded: true
+            knob:
+              bg_color: 0xF4F7FB
+              border_width: 5
+              border_color: 0x4A546A
+              pad_all: 2
+            on_value:
+              - lambda: |-
+                  panel::th.target = x / 2.0f;
+                  panel::th_touch();
+                  panel::set_temp(id(th_target), panel::th.target, "");
+                  id(th_pending) |= 2;
+              - script.execute: th_queue
+
+        - label:
+            id: th_mode_label
+            x: 6
+            y: 80
+            width: 250
+            text_align: CENTER
+            text: "Ziel"
+            text_font: font_12
+            text_color: 0x8892A8
+            text_letter_space: 1
+        - obj:
+            x: 6
+            y: 96
+            width: 250
+            height: 66
+            styles: box
+            clickable: false
+            scrollable: false
+            layout:
+              type: flex
+              flex_flow: ROW
+              flex_align_main: CENTER
+              flex_align_cross: START
+              pad_column: 0
+            widgets:
+              - label: { id: th_target, text: "--", text_font: font_54, text_color: 0xEEF2F8 }
+              - label: { text: "°", text_font: font_26, text_color: 0xEEF2F8, pad_top: 6 }
+        - label:
+            id: th_room
+            x: 6
+            y: 166
+            width: 250
+            text_align: CENTER
+            text: "Raum --°"
+            text_font: font_13
+            text_color: 0x8892A8
+
+        - button:
+            id: th_minus
+            x: 57
+            y: 258
+            width: 48
+            height: 48
+            radius: 24
+            bg_color: 0x182031
+            border_width: 1
+            border_color: 0x2C3650
+            widgets:
+              - label: { align: CENTER, text: "\U000F0374", text_font: icons_24 }
+            on_press:
+              - lambda: panel::press(id(th_minus), true);
+            on_release:
+              - lambda: panel::press(id(th_minus), false);
+            on_click:
+              - script.execute:
+                  id: th_step
+                  delta: -0.5
+        - button:
+            id: th_plus
+            x: 157
+            y: 258
+            width: 48
+            height: 48
+            radius: 24
+            bg_color: 0x182031
+            border_width: 1
+            border_color: 0x2C3650
+            widgets:
+              - label: { align: CENTER, text: "\U000F0415", text_font: icons_24 }
+            on_press:
+              - lambda: panel::press(id(th_plus), true);
+            on_release:
+              - lambda: panel::press(id(th_plus), false);
+            on_click:
+              - script.execute:
+                  id: th_step
+                  delta: 0.5
+
+        # Rechte Spalte
+        - label:
+            x: 270
+            y: 6
+            text: "MODUS"
+            styles: muted_caps
+        - obj:
+            id: th_modes
+            x: 268
+            y: 26
+            width: 198
+            height: 58
+            styles: box
+            scrollable: false
+            clickable: false
+            layout:
+              type: flex
+              flex_flow: ROW
+              pad_column: 6
+            widgets:
+              - button: &th_mode_button
+                  width: 62
+                  height: 58
+                  radius: 16
+                  bg_color: 0x182031
+                  border_width: 1
+                  border_color: 0x2C3650
+                  text_color: 0x8892A8
+                  pad_left: 2
+                  pad_right: 2
+                  layout:
+                    type: flex
+                    flex_flow: COLUMN
+                    flex_align_main: CENTER
+                    flex_align_cross: CENTER
+                    pad_row: 1
+                  widgets:
+                    - label: { text: "\U000F00F0", text_font: icons_22, width: 100%, text_align: CENTER }
+                    - label: { text: "Zeitplan", text_font: font_12, width: 100%, text_align: CENTER }
+                  on_click:
+                    - script.execute: { id: th_set_mode, mode: 0 }
+              - button:
+                  <<: *th_mode_button
+                  widgets:
+                    - label: { text: "\U000F0E47", text_font: icons_22, width: 100%, text_align: CENTER }
+                    - label: { text: "Manuell", text_font: font_12, width: 100%, text_align: CENTER }
+                  on_click:
+                    - script.execute: { id: th_set_mode, mode: 1 }
+              - button:
+                  <<: *th_mode_button
+                  widgets:
+                    - label: { text: "\U000F0425", text_font: icons_22, width: 100%, text_align: CENTER }
+                    - label: { text: "Aus", text_font: font_12, width: 100%, text_align: CENTER }
+                  on_click:
+                    - script.execute: { id: th_set_mode, mode: 2 }
+
+        # Boost: kurz volle Wärme
+        - button:
+            id: th_boost
+            x: 268
+            y: 96
+            width: 198
+            height: 58
+            radius: 16
+            bg_color: 0x182031
+            border_width: 1
+            border_color: 0x2C3650
+            text_color: 0x8892A8
+            widgets:
+              - label: { align: LEFT_MID, x: 14, text: "\U000F14DE", text_font: icons_22 }
+              - label: { align: LEFT_MID, x: 48, y: -9, text: "BOOST", text_font: font_12, text_letter_space: 1 }
+              - label: { align: LEFT_MID, x: 48, y: 9, text: "Kurz volle Wärme", text_font: font_14, text_color: 0xEEF2F8 }
+            on_press:
+              - lambda: panel::press(id(th_boost), true);
+            on_release:
+              - lambda: panel::press(id(th_boost), false);
+            on_click:
+              - lambda: |-
+                  panel::th.boost = !panel::th.boost;
+                  panel::th_touch();
+                  id(th_pending) |= 4;
+              - script.execute: th_render
+              - script.execute: th_queue
+
+        # Heizt gerade?
+        - obj:
+            x: 268
+            y: 166
+            width: 198
+            height: 58
+            radius: 16
+            bg_color: 0x141B2A
+            border_width: 1
+            border_color: 0x2C3650
+            pad_all: 0
+            scrollable: false
+            clickable: false
+            widgets:
+              - label:
+                  id: th_status_icon
+                  align: LEFT_MID
+                  x: 12
+                  text: "\U000F0438"
+                  text_font: icons_28
+                  text_color: 0x8892A8
+              - label:
+                  align: LEFT_MID
+                  x: 52
+                  y: -9
+                  text: "${heating_name | default('FUSSBODENHEIZUNG')}"
+                  styles: muted_caps
+              - label:
+                  id: th_status_text
+                  align: LEFT_MID
+                  x: 52
+                  y: 9
+                  text: "--"
+                  text_font: font_14
+                  text_color: 0xEEF2F8
+
+        - label:
+            id: th_send_state
+            x: 270
+            y: 238
+            text: ""
+            text_font: font_12
+            text_color: 0x8892A8
+
+script:
+  - id: th_render
+    then:
+      - lambda: |-
+          auto &t = panel::th;
+          t.arc = id(th_arc);
+          t.halo = id(th_halo);
+          t.mode_label = id(th_mode_label);
+          t.target_label = id(th_target);
+          t.modes = id(th_modes);
+          t.boost_btn = id(th_boost);
+          t.status_icon = id(th_status_icon);
+          t.status_text = id(th_status_text);
+          panel::th_render();
+
+  - id: th_set_mode
+    parameters:
+      mode: int
+    then:
+      - lambda: |-
+          panel::th.mode = mode;
+          panel::th_touch();
+          id(th_pending) |= 1;
+      - script.execute: th_render
+      - script.execute: th_queue
+
+  - id: th_step
+    parameters:
+      delta: float
+    then:
+      - lambda: |-
+          float t = std::isnan(panel::th.target) ? 20.0f : panel::th.target;
+          float lo = ${min_temp | default(15)}, hi = ${max_temp | default(28)};
+          panel::th.target = std::min(hi, std::max(lo, t + delta));
+          panel::th_touch();
+          id(th_pending) |= 2;
+      - script.execute: th_render
+      - script.execute: th_queue
+
+  # Kurz sammeln, dann senden (ein Aufruf statt fünf beim Tippen auf +)
+  - id: th_queue
+    mode: restart
+    then:
+      - lvgl.label.update:
+          id: th_send_state
+          text: "Sendet gleich …"
+      - delay: 1s
+      - if:
+          condition:
+            lambda: "return id(th_pending) & 1;"
+          then:
+            - homeassistant.action:
+                action: climate.set_hvac_mode
+                data:
+                  entity_id: ${entity_id}
+                  hvac_mode: !lambda "return std::string(panel::TH_KEYS[panel::th.mode]);"
+      - if:
+          condition:
+            lambda: "return (id(th_pending) & 2) && !std::isnan(panel::th.target);"
+          then:
+            - homeassistant.action:
+                action: climate.set_temperature
+                data:
+                  entity_id: ${entity_id}
+                  temperature: !lambda "return esphome::str_sprintf(\"%.1f\", panel::th.target);"
+      - if:
+          condition:
+            lambda: "return id(th_pending) & 4;"
+          then:
+            - homeassistant.action:
+                action: climate.set_preset_mode
+                data:
+                  entity_id: ${entity_id}
+                  preset_mode: !lambda "return std::string(panel::th.boost ? \"boost\" : \"none\");"
+      - globals.set:
+          id: th_pending
+          value: "0"
+      - lvgl.label.update:
+          id: th_send_state
+          text: "Gesendet ✓"
+
+text_sensor:
+  - platform: homeassistant
+    id: th_ha_mode
+    entity_id: ${entity_id}
+    internal: true
+    on_value:
+      - lambda: |-
+          if (!panel::th_editing())
+            panel::th.mode = panel::th_mode_index(x);
+      - script.execute: th_render
+
+  - platform: homeassistant
+    id: th_ha_action
+    entity_id: ${entity_id}
+    attribute: hvac_action
+    internal: true
+    on_value:
+      - lambda: panel::th.heating = x == "heating";
+      - script.execute: th_render
+
+  - platform: homeassistant
+    id: th_ha_preset
+    entity_id: ${entity_id}
+    attribute: preset_mode
+    internal: true
+    on_value:
+      - lambda: |-
+          if (!panel::th_editing())
+            panel::th.boost = x == "boost";
+      - script.execute: th_render
+
+sensor:
+  - platform: homeassistant
+    id: th_ha_target
+    entity_id: ${entity_id}
+    attribute: temperature
+    internal: true
+    on_value:
+      - lambda: |-
+          if (!panel::th_editing() && !std::isnan(x))
+            panel::th.target = x;
+      - script.execute: th_render
+
+  - platform: homeassistant
+    id: th_room_temperature
+    entity_id: ${entity_id}
+    attribute: current_temperature
+    internal: true
+    on_value:
+      - lambda: |-
+          char buf[24];
+          if (std::isnan(x))
+            snprintf(buf, sizeof(buf), "Raum --°");
+          else
+            snprintf(buf, sizeof(buf), "Raum %.1f°", x);
+          if (char *dot = strchr(buf, '.'))
+            *dot = ',';
+          lv_label_set_text(id(th_room), buf);

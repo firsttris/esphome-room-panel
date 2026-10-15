@@ -42,21 +42,26 @@ jobs:
           restore-keys: pio-host-${{ runner.os }}-
 
       - name: Render
-        run: sh preview/render.sh mila.yml
+        run: |
+          for room in mila eg; do
+            sh preview/render.sh "$room.yml"
+          done
 
       - name: Copy to docs
         run: |
-          mkdir -p docs
-          cp preview/shots/licht.png preview/shots/rolllaeden.png preview/shots/klima.png docs/
+          for room in mila eg; do
+            mkdir -p "docs/$room"
+            cp preview/shots/$room/licht.png preview/shots/$room/rolllaeden.png preview/shots/$room/klima.png "docs/$room/"
+          done
 
       - name: Commit if changed
         run: |
-          if git diff --quiet -- docs; then
+          git add docs
+          if git diff --cached --quiet; then
             echo "Screenshots unverändert"
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add docs
           git commit -m "docs: Screenshots aktualisieren"
           git push

@@ -124,6 +124,10 @@ font:
       "\U000F1A79",  # sun-snowflake-variant
       "\U000F058C",  # water
       "\U000F0210",  # fan
+      "\U000F0438",  # radiator
+      "\U000F00F0",  # calendar-clock
+      "\U000F0E47",  # hand-back-right
+      "\U000F14DE",  # rocket-launch
     ]
 
   - file: "fonts/materialdesignicons-webfont.ttf"
@@ -151,6 +155,7 @@ font:
       "\U000F1051",  # led-strip-variant
       "\U000F04CD",  # stairs
       "\U000F0210",  # fan
+      "\U000F0438",  # radiator
     ]
 
   - file: "fonts/materialdesignicons-webfont.ttf"
