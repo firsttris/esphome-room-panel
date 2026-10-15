@@ -34,7 +34,7 @@ Jede Lampe und jeder Rollladen ist eine Zeile in der Raum-Datei.
 
 | Seite | Inhalt |
 |---|---|
-| 💡 **Licht** | Kacheln, die beim Einschalten warm aufglühen, mit Welle beim Antippen; „Alle aus" |
+| 💡 **Licht** | Kacheln, die beim Einschalten warm aufglühen, mit Welle beim Antippen; Deckenlampen pendeln beim Schalten aus; „Alle aus" |
 | 🪟 **Rollläden** | Karten mit kleinem Fenster, dessen Behang während der Fahrt mitläuft; ▲ ■ ▼ und „Alle hoch/runter"; bei bis zu 4 Rollläden hohe Karten (`tall: true`) |
 | ❄️ **Klima** | Drehregler (18–32 °C), sechs Modi mit eigener Farbe, Lüfterstufe mit drehendem Symbol |
 | 🔥 **Heizung** | Alternative zu Klima: Drehregler für ein Thermostat, Zeitplan / Manuell / Aus, Boost, „heizt gerade" |

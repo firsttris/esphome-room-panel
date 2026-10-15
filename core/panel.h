@@ -140,6 +140,7 @@ struct LightState {
   int32_t level = 0;  // 0 = aus, 255 = an (Zwischenwerte während der Animation)
   bool on = false;
   bool known = false;
+  bool swing_left = false;  // Pendel-Richtung wechselt bei jedem Schalten
 };
 
 inline std::map<lv_obj_t *, LightState> lights;
@@ -201,7 +202,48 @@ inline void light_register(lv_obj_t *tile) {
   }
 }
 
-inline void light_set(lv_obj_t *tile, bool on) {
+// Pendelleuchte wie im ccu-addon-mui (fx-swing): 9°, -6°, 3°, -1°, Ruhe in 1,1 s.
+// v = 0..1100 ms, Vorzeichen der Richtung steckt in den User-Daten des Icons.
+inline void swing_cb(void *var, int32_t v) {
+  static const int32_t T[] = {0, 198, 462, 726, 924, 1100};  // 0 %, 18 %, 42 %, 66 %, 84 %, 100 %
+  static const int32_t A[] = {0, 90, -60, 30, -10, 0};       // Winkel in 0,1°
+  int i = 0;
+  while (i < 4 && v > T[i + 1])
+    i++;
+  int32_t t = (v - T[i]) * 1024 / (T[i + 1] - T[i]);
+  // weich zwischen den Stützpunkten (Kosinus-Interpolation)
+  float f = (1.0f - cosf(t / 1024.0f * 3.14159265f)) / 2.0f;
+  int32_t angle = A[i] + (int32_t) lroundf((A[i + 1] - A[i]) * f);
+  intptr_t dir = (intptr_t) lv_obj_get_user_data((lv_obj_t *) var);
+  lv_obj_set_style_transform_rotation((lv_obj_t *) var, dir < 0 ? -angle : angle, 0);
+}
+
+// Pendeln? swing = "true"/"false" aus der Raum-Datei, sonst nur beim Deckenlicht-Symbol
+inline bool wants_swing(const char *icon, const char *swing) {
+  if (strcmp(swing, "true") == 0 || strcmp(swing, "True") == 0)
+    return true;
+  if (strcmp(swing, "false") == 0 || strcmp(swing, "False") == 0)
+    return false;
+  return strcmp(icon, "\U000F0769") == 0;  // ceiling-light
+}
+
+inline void swing(lv_obj_t *tile, bool left) {
+  lv_obj_t *icon = child(child(tile, 0), 0);
+  lv_obj_set_style_transform_pivot_x(icon, lv_obj_get_width(icon) / 2, 0);
+  lv_obj_set_style_transform_pivot_y(icon, 0, 0);  // aufgehängt am oberen Rand
+  lv_obj_set_user_data(icon, (void *) (intptr_t) (left ? -1 : 1));
+  lv_anim_delete(icon, swing_cb);
+  lv_anim_t a;
+  lv_anim_init(&a);
+  lv_anim_set_var(&a, icon);
+  lv_anim_set_exec_cb(&a, swing_cb);
+  lv_anim_set_values(&a, 0, 1100);
+  lv_anim_set_duration(&a, 1100);
+  lv_anim_set_path_cb(&a, lv_anim_path_linear);
+  lv_anim_start(&a);
+}
+
+inline void light_set(lv_obj_t *tile, bool on, bool swings = false) {
   auto &s = lights[tile];
   if (s.known && s.on == on)
     return;
@@ -210,6 +252,10 @@ inline void light_set(lv_obj_t *tile, bool on) {
   s.known = true;
   lv_label_set_text(child(tile, 3), on ? "An" : "Aus");
   anim(tile, light_anim_cb, s.level, on ? 255 : 0, first ? 0 : 380);
+  if (swings && !first) {
+    swing(tile, s.swing_left);
+    s.swing_left = !s.swing_left;
+  }
   lights_changed();
 }
 

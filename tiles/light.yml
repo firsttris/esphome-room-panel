@@ -7,6 +7,8 @@
 #   icon:       MDI-Glyph, muss in core/fonts.yml unter icons_28 stehen
 #   compact:    true = flache Kachel (91 px) für drei Reihen, also bis zu 6 Lichter
 #   height:     eigene Höhe, z. B. 294 für zwei hohe Kacheln (nicht zusammen mit compact)
+#   swing:      true = Symbol pendelt beim Schalten wie eine Deckenleuchte
+#               (Standard: nur beim Deckenlicht-Symbol \U000F0769)
 
 lvgl:
   pages:
@@ -80,7 +82,7 @@ lvgl:
               - lambda: panel::press(id(${uid}_tile), false);
             on_click:
               # Sofort umschalten, HA bestätigt kurz danach
-              - lambda: panel::light_set(id(${uid}_tile), !panel::light_is_on(id(${uid}_tile)));
+              - lambda: panel::light_set(id(${uid}_tile), !panel::light_is_on(id(${uid}_tile)), panel::wants_swing("${icon}", "${swing | default('auto')}"));
               - homeassistant.action:
                   action: homeassistant.toggle
                   data:
@@ -95,7 +97,7 @@ binary_sensor:
     # Auch der erste Zustand nach dem Verbinden soll die Kachel setzen
     trigger_on_initial_state: true
     on_state:
-      - lambda: panel::light_set(id(${uid}_tile), x);
+      - lambda: panel::light_set(id(${uid}_tile), x, panel::wants_swing("${icon}", "${swing | default('auto')}"));
 
 script:
   # Kam keine Bestätigung, zeigt die Kachel nach 4 s wieder den echten Zustand
@@ -105,4 +107,4 @@ script:
       - delay: 4s
       - lambda: |-
           if (id(${uid}_ha).has_state())
-            panel::light_set(id(${uid}_tile), id(${uid}_ha).state);
+            panel::light_set(id(${uid}_tile), id(${uid}_ha).state, panel::wants_swing("${icon}", "${swing | default('auto')}"));

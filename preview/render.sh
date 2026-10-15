@@ -23,9 +23,10 @@ sleep 4
 tap() { xdotool mousemove "$1" "$2" mousedown 1 sleep 0.2 mouseup 1; }
 shot() { import -window root "$OUT/$1.png"; }
 shot licht
-tap 355 180   # Licht "Mitte" antippen
-sleep 1
+tap 355 180   # Licht antippen: Aufnahme mitten im Pendeln
+sleep 0.3
 shot licht-tippen
+sleep 1
 # Mitte der Reiter unten (drei oder vier Reiter)
 if grep -q '^  tabs: 4' "$ROOM"; then
   tap 182 439; sleep 1.2; shot rolllaeden
