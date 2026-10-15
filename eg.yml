@@ -5,6 +5,8 @@ substitutions:
   device_name: panel-eg
   friendly_name: Panel EG
   room_name: Erdgeschoss
+  # FPS-Anzeige oben und im Log ("false" schaltet sie ab)
+  show_fps: "true"
   room_subtitle: "Wohnen · Essen · Küche"
   room_icon: "\U000F02DC"  # home (muss in icons_24 und icons_40 stehen)
   # Raumtemperatur und Luftfeuchte

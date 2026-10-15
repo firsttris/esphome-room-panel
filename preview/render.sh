@@ -8,7 +8,8 @@ OUT=preview/shots/$NAME
 mkdir -p "$OUT"
 # Vorschau-Konfiguration: Hardware durch SDL ersetzen, Beispielwerte dazu
 sed -e 's#device: !include base/device.yml#device: !include preview/sdl.yml\n  demo: !include preview/demo-'"$NAME"'.yml#' \
-    -e 's#^\(  device_name: .*\)$#\1-preview\n  preview: true#' "$ROOM" > .preview.yml
+    -e 's#^\(  device_name: .*\)$#\1-preview\n  preview: true#' \
+    -e 's#^  show_fps: .*#  show_fps: "false"#' "$ROOM" > .preview.yml
 esphome compile .preview.yml
 DEV=$(sed -n 's/^  device_name: //p' "$ROOM")-preview
 BIN=.esphome/build/$DEV/.pioenvs/$DEV/program

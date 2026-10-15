@@ -20,6 +20,14 @@ esphome:
             panel::nav_paint();
             panel::lights_changed();
             panel::covers_changed();
+            panel::show_fps = ${show_fps | default('true')};
+            panel::fps_init(id(font_12)->get_lv_font());
+
+interval:
+  # FPS-Anzeige
+  - interval: 1s
+    then:
+      - lambda: panel::fps_update();
 
 globals:
   - id: ha_connected

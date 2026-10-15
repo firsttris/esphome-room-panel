@@ -7,6 +7,9 @@
 lvgl:
   log_level: NONE
   color_depth: 16
+  # Kleiner Zeichenpuffer (1/8 Bildschirm) im schnellen internen RAM statt
+  # des ganzen Bildschirms im PSRAM
+  buffer_size: 12%
 
   displays:
     - tft_display

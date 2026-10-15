@@ -5,6 +5,8 @@ substitutions:
   device_name: panel-mila
   friendly_name: Panel Mila
   room_name: Mila
+  # FPS-Anzeige oben und im Log ("false" schaltet sie ab)
+  show_fps: "true"
   room_subtitle: "Kinderzimmer · Dachgeschoss"
   room_icon: "\U000F18FB"  # teddy-bear (muss in icons_24 und icons_40 stehen)
   # Raumtemperatur und Luftfeuchte

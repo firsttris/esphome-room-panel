@@ -5,6 +5,8 @@ substitutions:
   device_name: panel-schlafzimmer
   friendly_name: Panel Schlafzimmer
   room_name: Schlafzimmer
+  # FPS-Anzeige oben und im Log ("false" schaltet sie ab)
+  show_fps: "true"
   room_subtitle: "Eltern · Vici"
   room_icon: "\U000F0FD2"  # bed-king (muss in icons_24 und icons_40 stehen)
   # Raumtemperatur und Luftfeuchte

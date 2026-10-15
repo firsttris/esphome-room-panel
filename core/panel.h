@@ -11,6 +11,7 @@
 #include <map>
 #include <string>
 #include <lvgl.h>
+#include "esphome/core/log.h"
 
 namespace panel {
 
@@ -725,6 +726,61 @@ inline void format_date(char *buf, size_t len, int wday, int mday, int month) {
                                      "Juli",   "August",  "September", "Oktober", "November", "Dezember"};
   // ESPTime: day_of_week 1 = Sonntag, month 1..12
   snprintf(buf, len, "%s, %d. %s", WD[(wday + 6) % 7], mday, MO[(month + 11) % 12]);
+}
+
+// ---------------------------------------------------------------------------
+// FPS-Anzeige: fertige Bilder pro Sekunde, Zeit pro Bild (davon Kopieren in die
+// Anzeige, inkl. Drehen) und Anteil des Bildschirms, der pro Bild neu gezeichnet wird
+// ---------------------------------------------------------------------------
+inline bool show_fps = true;
+inline lv_obj_t *fps_label = nullptr;
+inline uint32_t fps_frames = 0, fps_busy = 0, fps_t0 = 0, fps_window = 0, fps_flush = 0, fps_f0 = 0;
+inline uint64_t fps_px = 0;
+
+inline void fps_init(const lv_font_t *font) {
+  lv_display_t *disp = lv_display_get_default();
+  lv_display_add_event_cb(disp, [](lv_event_t *) { fps_t0 = lv_tick_get(); }, LV_EVENT_RENDER_START, nullptr);
+  lv_display_add_event_cb(disp, [](lv_event_t *) {
+    fps_frames++;
+    fps_busy += lv_tick_elaps(fps_t0);
+  }, LV_EVENT_RENDER_READY, nullptr);
+  lv_display_add_event_cb(disp, [](lv_event_t *) { fps_f0 = lv_tick_get(); }, LV_EVENT_FLUSH_START, nullptr);
+  lv_display_add_event_cb(disp, [](lv_event_t *) { fps_flush += lv_tick_elaps(fps_f0); }, LV_EVENT_FLUSH_FINISH, nullptr);
+  lv_display_add_event_cb(disp, [](lv_event_t *e) {
+    auto *a = (const lv_area_t *) lv_event_get_param(e);
+    if (a)
+      fps_px += (uint64_t) lv_area_get_width(a) * lv_area_get_height(a);
+  }, LV_EVENT_INVALIDATE_AREA, nullptr);
+  fps_window = lv_tick_get();
+  if (show_fps) {
+    fps_label = lv_label_create(lv_layer_top());
+    lv_obj_set_style_text_font(fps_label, font, 0);
+    lv_obj_set_style_text_color(fps_label, lv_color_hex(0x5C667C), 0);
+    lv_label_set_text(fps_label, "-- fps");
+    lv_obj_align(fps_label, LV_ALIGN_TOP_MID, 0, 2);
+  }
+}
+
+inline void fps_update() {
+  uint32_t ms = lv_tick_elaps(fps_window);
+  if (ms < 900)
+    return;
+  float fps = fps_frames * 1000.0f / ms;
+  float per = fps_frames ? (float) fps_busy / fps_frames : 0;
+  float copy = fps_frames ? (float) fps_flush / fps_frames : 0;
+  lv_display_t *disp = lv_display_get_default();
+  float share = fps_frames ? 100.0f * fps_px / fps_frames /
+                                 ((float) lv_display_get_horizontal_resolution(disp) * lv_display_get_vertical_resolution(disp))
+                           : 0;
+  char buf[64];
+  snprintf(buf, sizeof buf, "%d fps · %.1f ms (Kopie %.1f) · %d %%", (int) lroundf(fps), per, copy, (int) lroundf(share));
+  if (fps_label)
+    lv_label_set_text(fps_label, buf);
+  if (show_fps)
+    ESP_LOGI("panel", "%s", buf);
+  fps_frames = fps_busy = fps_flush = 0;
+  fps_px = 0;
+  fps_window = lv_tick_get();
 }
 
 }  // namespace panel
