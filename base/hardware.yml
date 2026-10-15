@@ -1,0 +1,75 @@
+# Hardware Konfiguration für ESP32-S3 Display
+
+esp32:
+  variant: esp32s3
+  flash_size: 16MB
+  framework:
+    type: esp-idf
+    advanced:
+      # Code & Konstanten aus dem PSRAM ausführen: entlastet den Flash-Bus,
+      # den sich das RGB-Panel sonst mit der CPU teilt (weniger Flackern)
+      execute_from_psram: true
+    sdkconfig_options:
+      # Größerer Daten-Cache beschleunigt das Rendern aus dem PSRAM-Framebuffer
+      CONFIG_ESP32S3_DATA_CACHE_64KB: y
+      CONFIG_ESP32S3_DATA_CACHE_LINE_64B: y
+
+psram:
+  mode: octal
+  speed: 80MHz
+
+# SPI für Display
+spi:
+  - id: lcd_spi
+    clk_pin: GPIO48
+    mosi_pin: GPIO47
+
+# I2C für Touchscreen
+i2c:
+  - id: touchscreen_bus
+    sda: GPIO19
+    scl:
+      number: 45
+      ignore_strapping_warning: true
+
+# Display Konfiguration
+display:
+  - platform: st7701s
+    id: tft_display
+    dimensions:
+      width: 480
+      height: 480
+    spi_mode: MODE3
+    data_rate: 2MHz
+    color_order: RGB
+    invert_colors: false
+    cs_pin: 39
+    de_pin: 18
+    hsync_pin: 16
+    vsync_pin: 17
+    pclk_pin: 21
+    pclk_frequency: 12MHz
+    pclk_inverted: false
+    hsync_pulse_width: 8
+    hsync_front_porch: 10
+    hsync_back_porch: 20
+    vsync_pulse_width: 8
+    vsync_front_porch: 10
+    vsync_back_porch: 10
+    update_interval: never
+    auto_clear_enabled: false
+    init_sequence:
+      - 1
+      - [0xFF, 0x77, 0x01, 0x00, 0x00, 0x10]
+      - [0xCD, 0x00]
+    data_pins:
+      red: [11, 12, 13, 14, 0]
+      green: [8, 20, 3, 46, 9, 10]
+      blue: [4, 5, 6, 7, 15]
+
+# Touchscreen
+touchscreen:
+  - platform: gt911
+    id: tft_touch
+    display: tft_display
+    i2c_id: touchscreen_bus

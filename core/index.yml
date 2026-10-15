@@ -1,0 +1,10 @@
+# Alles, was jedes Raum-Panel braucht. Wird von <raum>.yml eingebunden.
+
+esphome:
+  includes:
+    - core/panel.h
+
+packages:
+  fonts: !include fonts.yml
+  layout: !include layout.yml
+  logic: !include logic.yml

@@ -1,0 +1,144 @@
+# Schriften und Icons
+#
+# Outfit (Google Fonts) für Text und Zahlen, Material Design Icons für Symbole.
+# Jedes Icon, das ein Raum benutzt, muss hier in der passenden Größe stehen,
+# sonst bleibt es leer. Codepoints: https://pictogrammers.com/library/mdi/
+
+font:
+  - file: { type: gfonts, family: Outfit, weight: 400 }
+    id: font_12
+    size: 12
+    glyphs: &latin " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~°²³ÄÖÜäöüß·…✓Ø"
+
+  - file: { type: gfonts, family: Outfit, weight: 500 }
+    id: font_13
+    size: 13
+    glyphs: *latin
+
+  - file: { type: gfonts, family: Outfit, weight: 500 }
+    id: font_14
+    size: 14
+    glyphs: *latin
+
+  - file: { type: gfonts, family: Outfit, weight: 600 }
+    id: font_14b
+    size: 14
+    glyphs: *latin
+
+  - file: { type: gfonts, family: Outfit, weight: 600 }
+    id: font_19
+    size: 19
+    glyphs: *latin
+
+  - file: { type: gfonts, family: Outfit, weight: 600 }
+    id: font_20
+    size: 20
+    glyphs: *latin
+
+  - file: { type: gfonts, family: Outfit, weight: 600 }
+    id: font_22
+    size: 22
+    glyphs: *latin
+
+  - file: { type: gfonts, family: Outfit, weight: 400 }
+    id: font_17
+    size: 17
+    glyphs: *latin
+
+  # Solltemperatur im Drehregler
+  - file: { type: gfonts, family: Outfit, weight: 600 }
+    id: font_54
+    size: 54
+    glyphs: "0123456789,.-°"
+
+  - file: { type: gfonts, family: Outfit, weight: 400 }
+    id: font_26
+    size: 26
+    glyphs: "°"
+
+  # Uhr im Ruhemodus
+  - file: { type: gfonts, family: Outfit, weight: 300 }
+    id: font_110
+    size: 110
+    glyphs: "0123456789:-"
+
+  # --- Icons ---
+  - file: "fonts/materialdesignicons-webfont.ttf"
+    id: icons_14
+    size: 14
+    glyphs: &chip_icons [
+      "\U000F050F",  # thermometer
+      "\U000F058E",  # water-percent
+      "\U000F0595",  # weather-partly-cloudy
+      "\U000F0164",  # cloud-off-outline
+    ]
+
+  - file: "fonts/materialdesignicons-webfont.ttf"
+    id: icons_18
+    size: 18
+    glyphs: [
+      "\U000F050F",  # thermometer
+      "\U000F0595",  # weather-partly-cloudy
+      "\U000F0335",  # lightbulb
+      "\U000F0336",  # lightbulb-outline
+      "\U000F12CD",  # lightbulb-group-off
+      "\U000F0795",  # arrow-collapse-up
+      "\U000F0792",  # arrow-collapse-down
+    ]
+
+  - file: "fonts/materialdesignicons-webfont.ttf"
+    id: icons_20
+    size: 20
+    glyphs: [
+      "\U000F0143",  # chevron-up
+      "\U000F0140",  # chevron-down
+      "\U000F04DB",  # stop
+    ]
+
+  - file: "fonts/materialdesignicons-webfont.ttf"
+    id: icons_22
+    size: 22
+    glyphs: [
+      "\U000F0335",  # lightbulb
+      "\U000F111C",  # window-shutter
+      "\U000F001B",  # air-conditioner
+      "\U000F0425",  # power
+      "\U000F0238",  # fire
+      "\U000F0717",  # snowflake
+      "\U000F1A79",  # sun-snowflake-variant
+      "\U000F058C",  # water
+      "\U000F0210",  # fan
+    ]
+
+  - file: "fonts/materialdesignicons-webfont.ttf"
+    id: icons_24
+    size: 24
+    glyphs: [
+      "\U000F0374",  # minus
+      "\U000F0415",  # plus
+      "\U000F18FB",  # teddy-bear
+      "\U000F02DC",  # home
+    ]
+
+  # Licht-Kacheln und Lüfter
+  - file: "fonts/materialdesignicons-webfont.ttf"
+    id: icons_28
+    size: 28
+    glyphs: [
+      "\U000F0335",  # lightbulb
+      "\U000F0769",  # ceiling-light
+      "\U000F06B5",  # lamp
+      "\U000F08DD",  # floor-lamp
+      "\U000F091D",  # wall-sconce-flat
+      "\U000F1051",  # led-strip-variant
+      "\U000F04CD",  # stairs
+      "\U000F0210",  # fan
+    ]
+
+  - file: "fonts/materialdesignicons-webfont.ttf"
+    id: icons_40
+    size: 40
+    glyphs: [
+      "\U000F18FB",  # teddy-bear
+      "\U000F02DC",  # home
+    ]

@@ -1,0 +1,189 @@
+# Rollladen-Karte mit kleinem Fenster, dessen Behang live mitfährt
+#
+# vars:
+#   uid:          eindeutiger Name, z. B. dach_links
+#   entity_id:    HA-Entität cover.*
+#   text:         Beschriftung
+#   travel_time:  Fahrzeit ganz auf/zu in Sekunden (Standard 30)
+
+lvgl:
+  pages:
+    - id: !extend page_covers
+      widgets:
+        - obj:
+            id: ${uid}_card
+            styles: card
+            width: 221
+            height: 91
+            scrollable: false
+            clickable: false
+            widgets:
+              # 0: Fenster (Kind 0 = Sonne, Kind 1 = Behang)
+              - obj:
+                  x: 11
+                  y: 10
+                  width: 44
+                  height: 68
+                  radius: 8
+                  border_width: 2
+                  border_color: 0x3A465C
+                  bg_color: 0x78C3FF
+                  bg_grad_color: 0xD9F0FF
+                  bg_grad_dir: VER
+                  pad_all: 2
+                  clip_corner: true
+                  scrollable: false
+                  clickable: false
+                  widgets:
+                    - obj:
+                        align: TOP_RIGHT
+                        x: -3
+                        y: 4
+                        width: 10
+                        height: 10
+                        radius: 5
+                        bg_color: 0xFFE38A
+                        border_width: 0
+                        shadow_color: 0xFFE38A
+                        shadow_width: 8
+                        shadow_opa: 70%
+                        clickable: false
+                    - obj:
+                        x: 0
+                        y: 0
+                        width: 100%
+                        height: 0
+                        radius: 0
+                        bg_color: 0xA7B2C6
+                        border_side: BOTTOM
+                        border_width: 3
+                        border_color: 0x5D6880
+                        pad_all: 0
+                        scrollable: false
+                        clickable: false
+                        widgets:
+                          - obj: { align: BOTTOM_MID, y: -6, width: 100%, height: 2, radius: 0, border_width: 0, bg_color: 0x8995AB, clickable: false }
+                          - obj: { align: BOTTOM_MID, y: -13, width: 100%, height: 2, radius: 0, border_width: 0, bg_color: 0x8995AB, clickable: false }
+                          - obj: { align: BOTTOM_MID, y: -20, width: 100%, height: 2, radius: 0, border_width: 0, bg_color: 0x8995AB, clickable: false }
+                          - obj: { align: BOTTOM_MID, y: -27, width: 100%, height: 2, radius: 0, border_width: 0, bg_color: 0x8995AB, clickable: false }
+                          - obj: { align: BOTTOM_MID, y: -34, width: 100%, height: 2, radius: 0, border_width: 0, bg_color: 0x8995AB, clickable: false }
+                          - obj: { align: BOTTOM_MID, y: -41, width: 100%, height: 2, radius: 0, border_width: 0, bg_color: 0x8995AB, clickable: false }
+                          - obj: { align: BOTTOM_MID, y: -48, width: 100%, height: 2, radius: 0, border_width: 0, bg_color: 0x8995AB, clickable: false }
+                          - obj: { align: BOTTOM_MID, y: -55, width: 100%, height: 2, radius: 0, border_width: 0, bg_color: 0x8995AB, clickable: false }
+                          - obj: { align: BOTTOM_MID, y: -62, width: 100%, height: 2, radius: 0, border_width: 0, bg_color: 0x8995AB, clickable: false }
+              # 1: Name
+              - label:
+                  x: 66
+                  y: 7
+                  width: 145
+                  long_mode: DOT
+                  text: "${text}"
+                  text_font: font_14b
+                  text_color: 0xEEF2F8
+              # 2: Position
+              - label:
+                  x: 66
+                  y: 24
+                  text: "--"
+                  text_font: font_20
+                  text_color: 0x5CC8FF
+              # 3: Fahrt-Hinweis (Position setzt panel.h)
+              - label:
+                  x: 140
+                  y: 31
+                  text: ""
+                  text_font: font_12
+                  text_color: 0x5CC8FF
+              # 4: Knöpfe hoch / stopp / runter
+              - obj:
+                  x: 66
+                  y: 52
+                  width: 145
+                  height: 30
+                  styles: box
+                  scrollable: false
+                  clickable: false
+                  layout:
+                    type: flex
+                    flex_flow: ROW
+                    pad_column: 5
+                  widgets:
+                    - button:
+                        id: ${uid}_up
+                        flex_grow: 1
+                        height: 30
+                        radius: 12
+                        bg_color: 0x222B3E
+                        widgets:
+                          - label: { align: CENTER, text: "\U000F0143", text_font: icons_20 }
+                        on_press:
+                          - lambda: panel::press(id(${uid}_up), true);
+                        on_release:
+                          - lambda: panel::press(id(${uid}_up), false);
+                        on_click:
+                          - lambda: panel::cover_command(id(${uid}_card), 1);
+                          - homeassistant.action:
+                              action: cover.open_cover
+                              data:
+                                entity_id: ${entity_id}
+                    - button:
+                        id: ${uid}_stop
+                        flex_grow: 1
+                        height: 30
+                        radius: 12
+                        bg_color: 0x222B3E
+                        widgets:
+                          - label: { align: CENTER, text: "\U000F04DB", text_font: icons_20 }
+                        on_press:
+                          - lambda: panel::press(id(${uid}_stop), true);
+                        on_release:
+                          - lambda: panel::press(id(${uid}_stop), false);
+                        on_click:
+                          - lambda: panel::cover_command(id(${uid}_card), 0);
+                          - homeassistant.action:
+                              action: cover.stop_cover
+                              data:
+                                entity_id: ${entity_id}
+                    - button:
+                        id: ${uid}_down
+                        flex_grow: 1
+                        height: 30
+                        radius: 12
+                        bg_color: 0x222B3E
+                        widgets:
+                          - label: { align: CENTER, text: "\U000F0140", text_font: icons_20 }
+                        on_press:
+                          - lambda: panel::press(id(${uid}_down), true);
+                        on_release:
+                          - lambda: panel::press(id(${uid}_down), false);
+                        on_click:
+                          - lambda: panel::cover_command(id(${uid}_card), -1);
+                          - homeassistant.action:
+                              action: cover.close_cover
+                              data:
+                                entity_id: ${entity_id}
+
+text_sensor:
+  # opening / closing / open / closed
+  - platform: homeassistant
+    id: ${uid}_ha_state
+    entity_id: ${entity_id}
+    internal: true
+    on_value:
+      - lambda: |-
+          panel::cover_register(id(${uid}_card), ${travel_time | default(30)});
+          panel::cover_state(id(${uid}_card), x);
+
+sensor:
+  # 0 = zu, 100 = offen
+  - platform: homeassistant
+    id: ${uid}_ha_position
+    entity_id: ${entity_id}
+    attribute: current_position
+    internal: true
+    filters:
+      - filter_out: nan
+    on_value:
+      - lambda: |-
+          panel::cover_register(id(${uid}_card), ${travel_time | default(30)});
+          panel::cover_position(id(${uid}_card), x);

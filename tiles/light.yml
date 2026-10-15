@@ -1,0 +1,106 @@
+# Licht-Kachel: glüht beim Einschalten warm auf, Welle beim Antippen
+#
+# vars:
+#   uid:        eindeutiger Name, z. B. links
+#   entity_id:  HA-Entität (switch.*, light.*, input_boolean.*)
+#   text:       Beschriftung
+#   icon:       MDI-Glyph, muss in core/fonts.yml unter icons_28 stehen
+#   height:     Kachelhöhe (Standard 142 = zwei Reihen)
+
+lvgl:
+  pages:
+    - id: !extend page_lights
+      widgets:
+        - button:
+            id: ${uid}_tile
+            width: 221
+            height: ${height | default(142)}
+            radius: 24
+            bg_color: 0x182031
+            border_width: 1
+            border_color: 0x2C3650
+            shadow_color: 0xFFB547
+            shadow_width: 34
+            shadow_spread: -6
+            shadow_opa: 0%
+            clip_corner: true
+            pad_all: 0
+            widgets:
+              # 0: Icon-Blase
+              - obj:
+                  x: 16
+                  y: 16
+                  width: 52
+                  height: 52
+                  radius: 18
+                  bg_color: 0x222B3E
+                  border_width: 0
+                  pad_all: 0
+                  clickable: false
+                  widgets:
+                    - label:
+                        align: CENTER
+                        text: "${icon}"
+                        text_font: icons_28
+                        text_color: 0x5C667C
+              # 1: Punkt oben rechts
+              - obj:
+                  align: TOP_RIGHT
+                  x: -16
+                  y: 22
+                  width: 10
+                  height: 10
+                  radius: 5
+                  bg_color: 0x2C3650
+                  border_width: 0
+                  clickable: false
+              # 2: Name
+              - label:
+                  align: BOTTOM_LEFT
+                  x: 18
+                  y: -34
+                  text: "${text}"
+                  text_font: font_19
+                  text_color: 0xEEF2F8
+              # 3: Zustand
+              - label:
+                  align: BOTTOM_LEFT
+                  x: 18
+                  y: -15
+                  text: "Aus"
+                  text_font: font_13
+                  text_color: 0x8892A8
+            on_press:
+              - lambda: |-
+                  panel::press(id(${uid}_tile), true);
+                  panel::ripple(id(${uid}_tile), 0xFFC878);
+            on_release:
+              - lambda: panel::press(id(${uid}_tile), false);
+            on_click:
+              # Sofort umschalten, HA bestätigt kurz danach
+              - lambda: panel::light_set(id(${uid}_tile), !panel::light_is_on(id(${uid}_tile)));
+              - homeassistant.action:
+                  action: homeassistant.toggle
+                  data:
+                    entity_id: ${entity_id}
+              - script.execute: ${uid}_resync
+
+binary_sensor:
+  - platform: homeassistant
+    id: ${uid}_ha
+    entity_id: ${entity_id}
+    internal: true
+    # Auch der erste Zustand nach dem Verbinden soll die Kachel setzen
+    trigger_on_initial_state: true
+    on_state:
+      - lambda: panel::light_set(id(${uid}_tile), x);
+
+script:
+  # Kam keine Bestätigung, zeigt die Kachel nach 4 s wieder den echten Zustand
+  - id: ${uid}_resync
+    mode: restart
+    then:
+      - delay: 4s
+      - lambda: |-
+          if (id(${uid}_ha).has_state())
+            panel::light_set(id(${uid}_tile), id(${uid}_ha).state);

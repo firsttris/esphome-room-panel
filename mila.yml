@@ -1,0 +1,72 @@
+# Panel für Milas Zimmer im Dachgeschoss
+# Guition ESP32-S3-4848S040 (4", 480 × 480)
+
+substitutions:
+  device_name: panel-mila
+  friendly_name: Panel Mila
+  room_name: Mila
+  room_subtitle: "Kinderzimmer · Dachgeschoss"
+  room_icon: "\U000F18FB"  # teddy-bear (muss in icons_24 und icons_40 stehen)
+  # Raumtemperatur und Luftfeuchte
+  room_climate: climate.wandthermostat_dg
+  weather_entity: weather.forecast_home
+  # Für "Alle aus" / "Alle hoch" / "Alle runter"
+  all_lights: >-
+    switch.lichtschaltaktor_dg_licht_dg_links,
+    switch.lichtschaltaktor_dg_licht_dg_mitte,
+    switch.lichtschaltaktor_dg_licht_dg_rechts,
+    switch.lichtschaltaktor_dg_licht_dg_treppe
+  all_covers: >-
+    cover.rolladenaktor_dg_1_rolladen_dg_dach_links,
+    cover.rolladenaktor_dg_1_rolladen_dg_dach_mitte,
+    cover.rolladenaktor_dg_1_rolladen_dg_dach_rechts,
+    cover.rolladenaktor_dg_1_rolladen_dg_fenster_links,
+    cover.rolladenaktor_dg_2_rolladen_dg_grosses_fenster_rechts,
+    cover.rolladenaktor_dg_2_rolladen_dg_grosses_fenster_rechts_2
+
+esphome:
+  name: ${device_name}
+  friendly_name: ${friendly_name}
+
+packages:
+  device: !include base/device.yml
+  core: !include core/index.yml
+
+  # --- Licht ---
+  light_links: !include
+    file: tiles/light.yml
+    vars: { uid: links, entity_id: switch.lichtschaltaktor_dg_licht_dg_links, text: Links, icon: "\U000F0769" }
+  light_mitte: !include
+    file: tiles/light.yml
+    vars: { uid: mitte, entity_id: switch.lichtschaltaktor_dg_licht_dg_mitte, text: Mitte, icon: "\U000F0769" }
+  light_rechts: !include
+    file: tiles/light.yml
+    vars: { uid: rechts, entity_id: switch.lichtschaltaktor_dg_licht_dg_rechts, text: Rechts, icon: "\U000F0769" }
+  light_treppe: !include
+    file: tiles/light.yml
+    vars: { uid: treppe, entity_id: switch.lichtschaltaktor_dg_licht_dg_treppe, text: Treppe, icon: "\U000F04CD" }
+
+  # --- Rollläden ---
+  cover_dach_links: !include
+    file: tiles/cover.yml
+    vars: { uid: dach_links, entity_id: cover.rolladenaktor_dg_1_rolladen_dg_dach_links, text: Dachfenster links }
+  cover_dach_mitte: !include
+    file: tiles/cover.yml
+    vars: { uid: dach_mitte, entity_id: cover.rolladenaktor_dg_1_rolladen_dg_dach_mitte, text: Dachfenster Mitte }
+  cover_dach_rechts: !include
+    file: tiles/cover.yml
+    vars: { uid: dach_rechts, entity_id: cover.rolladenaktor_dg_1_rolladen_dg_dach_rechts, text: Dachfenster rechts }
+  cover_fenster_links: !include
+    file: tiles/cover.yml
+    vars: { uid: fenster_links, entity_id: cover.rolladenaktor_dg_1_rolladen_dg_fenster_links, text: Fenster links }
+  cover_gross: !include
+    file: tiles/cover.yml
+    vars: { uid: gross, entity_id: cover.rolladenaktor_dg_2_rolladen_dg_grosses_fenster_rechts, text: Großes Fenster }
+  cover_gross_2: !include
+    file: tiles/cover.yml
+    vars: { uid: gross_2, entity_id: cover.rolladenaktor_dg_2_rolladen_dg_grosses_fenster_rechts_2, text: Großes Fenster 2 }
+
+  # --- Klima ---
+  climate: !include
+    file: tiles/climate.yml
+    vars: { entity_id: climate.klima_mila, calls_entity: sensor.mila_gateway_verbleibende_fur_tag }

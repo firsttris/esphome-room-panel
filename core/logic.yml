@@ -1,0 +1,108 @@
+# Verbindung, Uhr, Raumwerte und Aufwecken
+
+esphome:
+  on_boot:
+    # Nach dem Aufbau der Oberfläche: Widgets an panel.h übergeben
+    - priority: -10
+      then:
+        - lambda: |-
+            panel::light_count_num = id(light_count_num);
+            panel::light_count_text = id(light_count_text);
+            panel::sleep_lights = id(sleep_lights);
+            panel::cover_count_num = id(cover_count_num);
+            panel::cover_count_text = id(cover_count_text);
+            panel::nav_indicator = id(nav_indicator);
+            panel::nav_buttons[0] = id(nav_btn_0);
+            panel::nav_buttons[1] = id(nav_btn_1);
+            panel::nav_buttons[2] = id(nav_btn_2);
+            panel::nav_paint();
+            panel::lights_changed();
+            panel::covers_changed();
+
+globals:
+  - id: ha_connected
+    type: bool
+    restore_value: no
+    initial_value: "false"
+
+time:
+  - platform: homeassistant
+    id: ha_time
+    on_time_sync:
+      then:
+        - script.execute: update_clock
+    on_time:
+      - seconds: 0
+        then:
+          - script.execute: update_clock
+
+script:
+  - id: on_ha_connected
+    then:
+      - globals.set:
+          id: ha_connected
+          value: "true"
+      - lvgl.widget.hide: offline_indicator
+      - lvgl.label.update:
+          id: loading_status
+          text: "Verbunden – lade Zustände …"
+      # Kurz warten, bis die ersten Zustände da sind
+      - delay: 1500ms
+      - lvgl.widget.hide: loading_overlay
+
+  - id: on_ha_disconnected
+    then:
+      - globals.set:
+          id: ha_connected
+          value: "false"
+      - lvgl.widget.show: offline_indicator
+
+  - id: wake_up
+    then:
+      - lvgl.widget.hide: [sleep_overlay, wake_catcher]
+      - light.turn_on:
+          id: display_backlight
+          brightness: 100%
+
+  - id: update_clock
+    then:
+      - lambda: |-
+          auto t = id(ha_time).now();
+          if (!t.is_valid())
+            return;
+          char buf[40];
+          snprintf(buf, sizeof(buf), "%02d:%02d", t.hour, t.minute);
+          lv_label_set_text(id(clock_label), buf);
+          lv_label_set_text(id(sleep_clock), buf);
+          panel::format_date(buf, sizeof(buf), t.day_of_week, t.day_of_month, t.month);
+          lv_label_set_text(id(sleep_date), buf);
+
+sensor:
+  # Raumtemperatur und Luftfeuchte vom Wandthermostat
+  - platform: homeassistant
+    id: room_temperature
+    entity_id: ${room_climate}
+    attribute: current_temperature
+    internal: true
+    on_value:
+      - lambda: |-
+          panel::set_temp(id(chip_temp), x);
+          panel::set_temp(id(sleep_temp), x);
+
+  - platform: homeassistant
+    id: room_humidity
+    entity_id: ${room_climate}
+    attribute: current_humidity
+    internal: true
+    on_value:
+      - lambda: panel::set_int(id(chip_humidity), x, " %");
+
+  - platform: homeassistant
+    id: outdoor_temperature
+    entity_id: ${weather_entity}
+    attribute: temperature
+    internal: true
+    on_value:
+      - lambda: |-
+          panel::set_int(id(chip_outdoor), x, "°");
+          panel::set_int(id(sleep_outdoor), x, "°");

@@ -1,0 +1,449 @@
+# Klima-Seite: Drehregler, Modus-Knöpfe, Lüfter
+#
+# Änderungen am Panel werden gesammelt und erst 2 s nach der letzten
+# Berührung an HA geschickt (Daikin Onecta erlaubt nur 200 Aufrufe am Tag).
+#
+# vars:
+#   entity_id:    HA-Entität climate.*
+#   calls_entity: Sensor mit den verbleibenden Cloud-Aufrufen (Onecta),
+#                 sonst eine beliebige nicht vorhandene Entität
+# Die Raumtemperatur kommt aus ${room_climate} (Substitution des Raums).
+
+globals:
+  - id: ac_pending
+    type: int  # Bitmaske: 1 = Modus, 2 = Temperatur, 4 = Lüfter
+    restore_value: no
+    initial_value: "0"
+
+lvgl:
+  pages:
+    - id: !extend page_climate
+      widgets:
+        # Farbiger Schein hinter dem Ring
+        - obj:
+            id: ac_halo
+            x: 37
+            y: 39
+            width: 188
+            height: 188
+            radius: 94
+            bg_color: 0x6B7488
+            bg_opa: 0%
+            border_width: 0
+            clickable: false
+
+        - arc:
+            id: ac_arc
+            x: 6
+            y: 8
+            width: 250
+            height: 250
+            rotation: 135
+            start_angle: 0
+            end_angle: 270
+            min_value: 36
+            max_value: 64
+            value: 49
+            adjustable: true
+            arc_width: 18
+            arc_color: 0x222B3E
+            arc_rounded: true
+            pad_all: 6
+            indicator:
+              arc_width: 18
+              arc_color: 0x4A546A
+              arc_rounded: true
+            knob:
+              bg_color: 0xF4F7FB
+              border_width: 5
+              border_color: 0x4A546A
+              pad_all: 2
+            on_value:
+              - lambda: |-
+                  panel::ac.target = x / 2.0f;
+                  panel::ac_touch();
+                  panel::set_temp(id(ac_target), panel::ac.target, "");
+                  id(ac_pending) |= 2;
+              - script.execute: ac_queue
+
+        - label:
+            id: ac_mode_label
+            x: 6
+            y: 80
+            width: 250
+            text_align: CENTER
+            text: "Aus · Ziel"
+            text_font: font_12
+            text_color: 0x8892A8
+            text_letter_space: 1
+        - obj:
+            x: 6
+            y: 96
+            width: 250
+            height: 66
+            styles: box
+            clickable: false
+            scrollable: false
+            layout:
+              type: flex
+              flex_flow: ROW
+              flex_align_main: CENTER
+              flex_align_cross: START
+              pad_column: 0
+            widgets:
+              - label: { id: ac_target, text: "--", text_font: font_54, text_color: 0xEEF2F8 }
+              - label: { text: "°", text_font: font_26, text_color: 0xEEF2F8, pad_top: 6 }
+        - label:
+            id: ac_room
+            x: 6
+            y: 166
+            width: 250
+            text_align: CENTER
+            text: "Raum --°"
+            text_font: font_13
+            text_color: 0x8892A8
+
+        - button:
+            id: ac_minus
+            x: 57
+            y: 258
+            width: 48
+            height: 48
+            radius: 24
+            bg_color: 0x182031
+            border_width: 1
+            border_color: 0x2C3650
+            widgets:
+              - label: { align: CENTER, text: "\U000F0374", text_font: icons_24 }
+            on_press:
+              - lambda: panel::press(id(ac_minus), true);
+            on_release:
+              - lambda: panel::press(id(ac_minus), false);
+            on_click:
+              - script.execute:
+                  id: ac_step
+                  delta: -0.5
+        - button:
+            id: ac_plus
+            x: 157
+            y: 258
+            width: 48
+            height: 48
+            radius: 24
+            bg_color: 0x182031
+            border_width: 1
+            border_color: 0x2C3650
+            widgets:
+              - label: { align: CENTER, text: "\U000F0415", text_font: icons_24 }
+            on_press:
+              - lambda: panel::press(id(ac_plus), true);
+            on_release:
+              - lambda: panel::press(id(ac_plus), false);
+            on_click:
+              - script.execute:
+                  id: ac_step
+                  delta: 0.5
+
+        # Rechte Spalte
+        - label:
+            x: 270
+            y: 6
+            text: "MODUS"
+            styles: muted_caps
+        - obj:
+            id: ac_modes
+            x: 268
+            y: 26
+            width: 198
+            height: 122
+            styles: box
+            scrollable: false
+            clickable: false
+            layout:
+              type: flex
+              flex_flow: ROW_WRAP
+              pad_row: 6
+              pad_column: 6
+            widgets:
+              - button: &mode_button
+                  width: 62
+                  height: 58
+                  radius: 16
+                  bg_color: 0x182031
+                  border_width: 1
+                  border_color: 0x2C3650
+                  text_color: 0x8892A8
+                  layout:
+                    type: flex
+                    flex_flow: COLUMN
+                    flex_align_main: CENTER
+                    flex_align_cross: CENTER
+                    pad_row: 1
+                  widgets:
+                    - label: { text: "\U000F0425", text_font: icons_22 }
+                    - label: { text: "Aus", text_font: font_12 }
+                  on_click:
+                    - script.execute: { id: ac_set_mode, mode: 0 }
+              - button:
+                  <<: *mode_button
+                  widgets:
+                    - label: { text: "\U000F0238", text_font: icons_22 }
+                    - label: { text: "Heizen", text_font: font_12 }
+                  on_click:
+                    - script.execute: { id: ac_set_mode, mode: 1 }
+              - button:
+                  <<: *mode_button
+                  widgets:
+                    - label: { text: "\U000F0717", text_font: icons_22 }
+                    - label: { text: "Kühlen", text_font: font_12 }
+                  on_click:
+                    - script.execute: { id: ac_set_mode, mode: 2 }
+              - button:
+                  <<: *mode_button
+                  widgets:
+                    - label: { text: "\U000F1A79", text_font: icons_22 }
+                    - label: { text: "Auto", text_font: font_12 }
+                  on_click:
+                    - script.execute: { id: ac_set_mode, mode: 3 }
+              - button:
+                  <<: *mode_button
+                  widgets:
+                    - label: { text: "\U000F058C", text_font: icons_22 }
+                    - label: { text: "Trocken", text_font: font_12 }
+                  on_click:
+                    - script.execute: { id: ac_set_mode, mode: 4 }
+              - button:
+                  <<: *mode_button
+                  widgets:
+                    - label: { text: "\U000F0210", text_font: icons_22 }
+                    - label: { text: "Lüften", text_font: font_12 }
+                  on_click:
+                    - script.execute: { id: ac_set_mode, mode: 5 }
+
+        - button:
+            id: ac_fan
+            x: 268
+            y: 160
+            width: 198
+            height: 58
+            radius: 16
+            bg_color: 0x182031
+            border_width: 1
+            border_color: 0x2C3650
+            widgets:
+              - label:
+                  id: ac_fan_icon
+                  align: LEFT_MID
+                  x: 12
+                  width: 32
+                  height: 32
+                  text_align: CENTER
+                  text: "\U000F0210"
+                  text_font: icons_28
+                  text_color: 0xA9B6CB
+              - label:
+                  align: LEFT_MID
+                  x: 52
+                  y: -9
+                  text: "LÜFTER"
+                  styles: muted_caps
+              - label:
+                  id: ac_fan_text
+                  align: LEFT_MID
+                  x: 52
+                  y: 9
+                  text: "Auto"
+                  text_font: font_14
+                  text_color: 0xEEF2F8
+              - obj:
+                  id: ac_fan_bars
+                  align: RIGHT_MID
+                  x: -12
+                  width: 32
+                  height: 18
+                  styles: box
+                  clickable: false
+                  layout:
+                    type: flex
+                    flex_flow: ROW
+                    flex_align_cross: END
+                    pad_column: 3
+                  widgets:
+                    - obj: { width: 4, height: 6, radius: 2, border_width: 0, bg_color: 0x2C3650, clickable: false }
+                    - obj: { width: 4, height: 9, radius: 2, border_width: 0, bg_color: 0x2C3650, clickable: false }
+                    - obj: { width: 4, height: 12, radius: 2, border_width: 0, bg_color: 0x2C3650, clickable: false }
+                    - obj: { width: 4, height: 15, radius: 2, border_width: 0, bg_color: 0x2C3650, clickable: false }
+                    - obj: { width: 4, height: 18, radius: 2, border_width: 0, bg_color: 0x2C3650, clickable: false }
+            on_press:
+              - lambda: panel::press(id(ac_fan), true);
+            on_release:
+              - lambda: panel::press(id(ac_fan), false);
+            on_click:
+              - lambda: |-
+                  panel::ac.fan = (panel::ac.fan + 1) % panel::FAN_COUNT;
+                  panel::ac_touch();
+                  id(ac_pending) |= 4;
+              - script.execute: ac_render
+              - script.execute: ac_queue
+
+        - label:
+            id: ac_send_state
+            x: 270
+            y: 232
+            text: "Aktuell"
+            text_font: font_12
+            text_color: 0xEEF2F8
+        - label:
+            id: ac_calls
+            x: 340
+            y: 232
+            width: 126
+            text_align: RIGHT
+            text: ""
+            text_font: font_12
+            text_color: 0x8892A8
+
+script:
+  # Widgets an panel.h übergeben und neu zeichnen
+  - id: ac_render
+    then:
+      - lambda: |-
+          auto &a = panel::ac;
+          a.arc = id(ac_arc);
+          a.halo = id(ac_halo);
+          a.mode_label = id(ac_mode_label);
+          a.target_label = id(ac_target);
+          a.modes = id(ac_modes);
+          a.fan_icon = id(ac_fan_icon);
+          a.fan_text = id(ac_fan_text);
+          a.fan_bars = id(ac_fan_bars);
+          panel::ac_render();
+
+  - id: ac_set_mode
+    parameters:
+      mode: int
+    then:
+      - lambda: |-
+          panel::ac.mode = mode;
+          panel::ac_touch();
+          id(ac_pending) |= 1;
+      - script.execute: ac_render
+      - script.execute: ac_queue
+
+  - id: ac_step
+    parameters:
+      delta: float
+    then:
+      - lambda: |-
+          float t = std::isnan(panel::ac.target) ? 22.0f : panel::ac.target;
+          panel::ac.target = std::min(32.0f, std::max(18.0f, t + delta));
+          panel::ac_touch();
+          id(ac_pending) |= 2;
+      - script.execute: ac_render
+      - script.execute: ac_queue
+
+  # Sammelt Änderungen und sendet 2 s nach der letzten Berührung
+  - id: ac_queue
+    mode: restart
+    then:
+      - lvgl.label.update:
+          id: ac_send_state
+          text: "Sendet gleich …"
+      - delay: 2s
+      - if:
+          condition:
+            lambda: "return id(ac_pending) & 1;"
+          then:
+            - homeassistant.action:
+                action: climate.set_hvac_mode
+                data:
+                  entity_id: ${entity_id}
+                  hvac_mode: !lambda "return std::string(panel::MODE_KEYS[panel::ac.mode]);"
+      - if:
+          condition:
+            lambda: "return (id(ac_pending) & 2) && !std::isnan(panel::ac.target);"
+          then:
+            - homeassistant.action:
+                action: climate.set_temperature
+                data:
+                  entity_id: ${entity_id}
+                  temperature: !lambda "return esphome::str_sprintf(\"%.1f\", panel::ac.target);"
+      - if:
+          condition:
+            lambda: "return id(ac_pending) & 4;"
+          then:
+            - homeassistant.action:
+                action: climate.set_fan_mode
+                data:
+                  entity_id: ${entity_id}
+                  fan_mode: !lambda "return std::string(panel::FAN_KEYS[panel::ac.fan]);"
+      - globals.set:
+          id: ac_pending
+          value: "0"
+      - lvgl.label.update:
+          id: ac_send_state
+          text: "Gesendet ✓"
+
+text_sensor:
+  - platform: homeassistant
+    id: ac_ha_mode
+    entity_id: ${entity_id}
+    internal: true
+    on_value:
+      - lambda: |-
+          if (!panel::ac_editing())
+            panel::ac.mode = panel::mode_index(x);
+      - script.execute: ac_render
+
+  - platform: homeassistant
+    id: ac_ha_fan
+    entity_id: ${entity_id}
+    attribute: fan_mode
+    internal: true
+    on_value:
+      - lambda: |-
+          if (!panel::ac_editing())
+            panel::ac.fan = panel::fan_index(x);
+      - script.execute: ac_render
+
+sensor:
+  - platform: homeassistant
+    id: ac_ha_target
+    entity_id: ${entity_id}
+    attribute: temperature
+    internal: true
+    on_value:
+      - lambda: |-
+          if (!panel::ac_editing() && !std::isnan(x))
+            panel::ac.target = x;
+      - script.execute: ac_render
+
+  - platform: homeassistant
+    id: ac_room_temperature
+    entity_id: ${room_climate}
+    attribute: current_temperature
+    internal: true
+    on_value:
+      - lambda: |-
+          char buf[24];
+          if (std::isnan(x))
+            snprintf(buf, sizeof(buf), "Raum --°");
+          else
+            snprintf(buf, sizeof(buf), "Raum %.1f°", x);
+          if (char *dot = strchr(buf, '.'))
+            *dot = ',';
+          lv_label_set_text(id(ac_room), buf);
+
+  - platform: homeassistant
+    id: ac_calls_left
+    entity_id: ${calls_entity}
+    internal: true
+    on_value:
+      - lambda: |-
+          if (std::isnan(x)) {
+            lv_label_set_text(id(ac_calls), "");
+            return;
+          }
+          char buf[24];
+          snprintf(buf, sizeof(buf), "%d Aufrufe frei", (int) x);
+          lv_label_set_text(id(ac_calls), buf);

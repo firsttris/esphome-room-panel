@@ -1,0 +1,36 @@
+# Beispielwerte für die Vorschau (wie im Mockup)
+
+esphome:
+  on_boot:
+    - priority: -100
+      then:
+        - delay: 300ms
+        - lvgl.widget.hide: loading_overlay
+        - lambda: |-
+            lv_label_set_text(id(clock_label), "14:32");
+            lv_label_set_text(id(sleep_clock), "14:32");
+            lv_label_set_text(id(sleep_date), "Mittwoch, 15. Oktober");
+            id(room_temperature).publish_state(22.0);
+            id(room_humidity).publish_state(48);
+            id(outdoor_temperature).publish_state(13);
+            id(links_ha).publish_state(true);
+            id(mitte_ha).publish_state(false);
+            id(rechts_ha).publish_state(true);
+            id(treppe_ha).publish_state(false);
+            id(dach_links_ha_state).publish_state("open");
+            id(dach_links_ha_position).publish_state(100);
+            id(dach_mitte_ha_state).publish_state("open");
+            id(dach_mitte_ha_position).publish_state(100);
+            id(dach_rechts_ha_state).publish_state("open");
+            id(dach_rechts_ha_position).publish_state(40);
+            id(fenster_links_ha_state).publish_state("opening");
+            id(fenster_links_ha_position).publish_state(70);
+            id(gross_ha_state).publish_state("closed");
+            id(gross_ha_position).publish_state(0);
+            id(gross_2_ha_state).publish_state("closed");
+            id(gross_2_ha_position).publish_state(0);
+            id(ac_ha_mode).publish_state("heat");
+            id(ac_ha_target).publish_state(22.5);
+            id(ac_ha_fan).publish_state("3");
+            id(ac_room_temperature).publish_state(22.0);
+            id(ac_calls_left).publish_state(182);

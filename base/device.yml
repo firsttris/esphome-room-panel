@@ -1,0 +1,11 @@
+# Echtes Gerät: Guition ESP32-S3-4848S040
+# (Für Screenshots am PC ersetzt preview/sdl.yml diese Datei.)
+
+packages:
+  hardware: !include hardware.yml
+  network: !include network.yml
+  backlight: !include backlight.yml
+
+lvgl:
+  # Einbaulage des Displays
+  rotation: 270
