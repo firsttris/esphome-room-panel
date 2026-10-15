@@ -22,10 +22,7 @@ lvgl:
             bg_color: 0x182031
             border_width: 1
             border_color: 0x2C3650
-            shadow_color: 0xFFB547
-            shadow_width: 34
-            shadow_spread: -6
-            shadow_opa: 0%
+            # Lichtschein: vorberechnetes Bild hinter der Kachel (panel.h)
             clip_corner: true
             pad_all: 0
             widgets:

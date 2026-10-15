@@ -10,6 +10,7 @@
 #include <cstring>
 #include <map>
 #include <string>
+#include <vector>
 #include <lvgl.h>
 #include "esphome/core/log.h"
 
@@ -149,10 +150,76 @@ inline lv_obj_t *light_count_num = nullptr;   // "2"
 inline lv_obj_t *light_count_text = nullptr;  // " von 4 an"
 inline lv_obj_t *sleep_lights = nullptr;      // Ruhemodus: "2 Lichter an"
 
+// Lichtschein: einmal als Bild vorberechnet und beim Schalten nur ein- und
+// ausgeblendet. Ein weicher Schatten an der Kachel müsste in jedem Bild der
+// Animation neu gezeichnet werden – das ist auf dem ESP32-S3 zu langsam.
+constexpr int32_t GLOW_M = 12;  // Rand um die Kachel (Schatten 34 px, Spread -6 → 11 px)
+
+struct GlowBuf {
+  int32_t w, h;
+  lv_draw_buf_t *buf;
+};
+inline std::vector<GlowBuf> glow_bufs;  // ein Bild je Kachelgröße
+inline std::map<lv_obj_t *, lv_obj_t *> glows;
+
+inline lv_draw_buf_t *glow_buf(lv_obj_t *tile) {
+  int32_t w = lv_obj_get_width(tile), h = lv_obj_get_height(tile);
+  for (auto &g : glow_bufs)
+    if (g.w == w && g.h == h)
+      return g.buf;
+  lv_draw_buf_t *buf = lv_draw_buf_create(w + 2 * GLOW_M, h + 2 * GLOW_M, LV_COLOR_FORMAT_ARGB8888, LV_STRIDE_AUTO);
+  if (buf == nullptr)
+    return nullptr;
+  lv_draw_buf_clear(buf, nullptr);
+  // In einem unsichtbaren Canvas den Schatten der Kachel einmal malen
+  lv_obj_t *cv = lv_canvas_create(lv_layer_top());
+  lv_obj_add_flag(cv, LV_OBJ_FLAG_HIDDEN);
+  lv_canvas_set_draw_buf(cv, buf);
+  lv_layer_t layer;
+  lv_canvas_init_layer(cv, &layer);
+  lv_draw_rect_dsc_t d;
+  lv_draw_rect_dsc_init(&d);
+  d.bg_opa = LV_OPA_TRANSP;
+  d.border_width = 0;
+  d.radius = lv_obj_get_style_radius(tile, LV_PART_MAIN);
+  d.shadow_color = lv_color_hex(0xFFB547);
+  d.shadow_width = 34;
+  d.shadow_spread = -6;
+  d.shadow_opa = LV_OPA_COVER;
+  lv_area_t a = {GLOW_M, GLOW_M, GLOW_M + w - 1, GLOW_M + h - 1};
+  lv_draw_rect(&layer, &d, &a);
+  lv_canvas_finish_layer(cv, &layer);
+  lv_obj_delete(cv);
+  glow_bufs.push_back({w, h, buf});
+  return buf;
+}
+
+// Schein-Objekt hinter der Kachel (beim ersten Einschalten angelegt)
+inline lv_obj_t *glow_of(lv_obj_t *tile) {
+  auto it = glows.find(tile);
+  if (it != glows.end())
+    return it->second;
+  lv_obj_t *parent = lv_obj_get_parent(tile);
+  lv_obj_update_layout(parent);
+  lv_draw_buf_t *buf = glow_buf(tile);
+  if (buf == nullptr)
+    return glows[tile] = nullptr;
+  lv_obj_t *g = lv_canvas_create(parent);
+  lv_canvas_set_draw_buf(g, buf);
+  lv_obj_add_flag(g, LV_OBJ_FLAG_IGNORE_LAYOUT);
+  lv_obj_remove_flag(g, LV_OBJ_FLAG_CLICKABLE);
+  lv_obj_set_pos(g, lv_obj_get_x(tile) - GLOW_M, lv_obj_get_y(tile) - GLOW_M);
+  lv_obj_move_to_index(g, lv_obj_get_index(tile));  // direkt unter die Kachel
+  lv_obj_set_style_image_opa(g, 0, 0);
+  return glows[tile] = g;
+}
+
 inline void light_paint(lv_obj_t *tile, int32_t v) {
   lv_obj_set_style_bg_color(tile, mix(CARD, AMBER_BG, v), 0);
   lv_obj_set_style_border_color(tile, mix(LINE, AMBER_LINE, v), 0);
-  lv_obj_set_style_shadow_opa(tile, v * 95 / 255, 0);
+  lv_obj_t *g = v > 0 ? glow_of(tile) : (glows.count(tile) ? glows[tile] : nullptr);
+  if (g != nullptr)
+    lv_obj_set_style_image_opa(g, v * 95 / 255, 0);
   lv_obj_t *bubble = child(tile, 0);
   lv_obj_set_style_bg_color(bubble, mix(CARD2, AMBER, v), 0);
   lv_obj_set_style_text_color(child(bubble, 0), mix(DIM, AMBER_DEEP, v), 0);

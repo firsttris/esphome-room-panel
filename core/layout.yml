@@ -7,9 +7,6 @@
 lvgl:
   log_level: NONE
   color_depth: 16
-  # Kleiner Zeichenpuffer (1/8 Bildschirm) im schnellen internen RAM statt
-  # des ganzen Bildschirms im PSRAM
-  buffer_size: 12%
 
   displays:
     - tft_display
@@ -72,6 +69,12 @@ lvgl:
   # ------------------------------------------------------------------
   top_layer:
     widgets:
+      # Aktiviert LVGL-Canvas für den vorberechneten Lichtschein (panel.h)
+      - canvas:
+          id: canvas_enable
+          width: 1
+          height: 1
+          hidden: true
       # --- Kopfzeile ---
       - obj:
           id: header
@@ -204,19 +207,9 @@ lvgl:
                   - label: { text: "\U000F0335", text_font: icons_22 }
                   - label: { text: "Licht", text_font: font_13 }
                 on_click:
-                  - if:
-                      condition:
-                        lambda: "return panel::page > 0;"
-                      then:
-                        - lvgl.page.show:
-                            id: page_lights
-                            animation: MOVE_RIGHT
-                            time: 300ms
-                      else:
-                        - lvgl.page.show:
-                            id: page_lights
-                            animation: MOVE_LEFT
-                            time: 300ms
+                  # Sofort wechseln: eine Schiebe-Animation müsste den ganzen Bildschirm
+                  # in jedem Bild neu zeichnen, das schafft der ESP32-S3 nicht flüssig
+                  - lvgl.page.show: page_lights
                   - lambda: panel::nav_go(0);
             - button:
                 id: nav_btn_1
@@ -240,19 +233,9 @@ lvgl:
                   - label: { text: "\U000F111C", text_font: icons_22 }
                   - label: { text: "Rollläden", text_font: font_13 }
                 on_click:
-                  - if:
-                      condition:
-                        lambda: "return panel::page > 1;"
-                      then:
-                        - lvgl.page.show:
-                            id: page_covers
-                            animation: MOVE_RIGHT
-                            time: 300ms
-                      else:
-                        - lvgl.page.show:
-                            id: page_covers
-                            animation: MOVE_LEFT
-                            time: 300ms
+                  # Sofort wechseln: eine Schiebe-Animation müsste den ganzen Bildschirm
+                  # in jedem Bild neu zeichnen, das schafft der ESP32-S3 nicht flüssig
+                  - lvgl.page.show: page_covers
                   - lambda: panel::nav_go(1);
             - button:
                 id: nav_btn_2
@@ -276,19 +259,9 @@ lvgl:
                   - label: { text: "${climate_tab_icon | default('\U000F001B')}", text_font: icons_22 }
                   - label: { text: "${climate_tab_text | default('Klima')}", text_font: font_13 }
                 on_click:
-                  - if:
-                      condition:
-                        lambda: "return panel::page > 2;"
-                      then:
-                        - lvgl.page.show:
-                            id: page_climate
-                            animation: MOVE_RIGHT
-                            time: 300ms
-                      else:
-                        - lvgl.page.show:
-                            id: page_climate
-                            animation: MOVE_LEFT
-                            time: 300ms
+                  # Sofort wechseln: eine Schiebe-Animation müsste den ganzen Bildschirm
+                  # in jedem Bild neu zeichnen, das schafft der ESP32-S3 nicht flüssig
+                  - lvgl.page.show: page_climate
                   - lambda: panel::nav_go(2);
             - button:
                 id: nav_btn_3
@@ -313,19 +286,9 @@ lvgl:
                   - label: { text: "${heating_tab_icon | default('\U000F0438')}", text_font: icons_22 }
                   - label: { text: "${heating_tab_text | default('Heizung')}", text_font: font_13 }
                 on_click:
-                  - if:
-                      condition:
-                        lambda: "return panel::page > 3;"
-                      then:
-                        - lvgl.page.show:
-                            id: page_heating
-                            animation: MOVE_RIGHT
-                            time: 300ms
-                      else:
-                        - lvgl.page.show:
-                            id: page_heating
-                            animation: MOVE_LEFT
-                            time: 300ms
+                  # Sofort wechseln: eine Schiebe-Animation müsste den ganzen Bildschirm
+                  # in jedem Bild neu zeichnen, das schafft der ESP32-S3 nicht flüssig
+                  - lvgl.page.show: page_heating
                   - lambda: panel::nav_go(3);
 
       # --- Erste Berührung nach dem Abdunkeln: nur aufwecken ---
