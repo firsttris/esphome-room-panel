@@ -8,4 +8,3 @@ packages:
   fonts: !include fonts.yml
   layout: !include layout.yml
   logic: !include logic.yml
-  debug: !include debug.yml

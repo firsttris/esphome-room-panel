@@ -52,7 +52,7 @@ All screenshots are rendered from the firmware in CI on every change, with sampl
 
 | Page | What you get |
 |---|---|
-| 💡 **Lights** | Tiles that glow warm when switched on, a ripple from your finger, and ceiling lamps that swing like a pendant lamp; "all off" |
+| 💡 **Lights** | Tiles that turn warm when switched on, and ceiling lamps that swing like a pendant lamp; "all off" |
 | 🪟 **Roller shutters** | Cards with a small window whose shutter moves live while the real one travels; ▲ ■ ▼ and "all up / all down"; tall cards for up to 4 shutters |
 | ❄️ **Air conditioning** | Dial (18–32 °C), six modes with their own colour, fan speed with a spinning fan |
 | 🔥 **Heating** | Dial for a thermostat, schedule / manual / off, boost, "heating now" |

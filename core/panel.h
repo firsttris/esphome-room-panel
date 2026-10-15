@@ -83,63 +83,10 @@ inline void anim(void *var, lv_anim_exec_xcb_t cb, int32_t from, int32_t to, uin
 // ---------------------------------------------------------------------------
 // Drück-Effekt: Kachel schrumpft kurz um 5 %
 // ---------------------------------------------------------------------------
-// Test-Schalter (vorübergehend, in HA beim Gerät): Effekte einzeln abschalten,
-// um auf dem Gerät zu messen, was beim Lichtschalten Zeit kostet
-inline bool dbg_ripple = true, dbg_press = true, dbg_clip = true, dbg_glow = true;
-
 inline void press(lv_obj_t *o, bool down) {
-  if (!dbg_press)
-    down = false;
   lv_obj_set_style_transform_pivot_x(o, lv_obj_get_width(o) / 2, 0);
   lv_obj_set_style_transform_pivot_y(o, lv_obj_get_height(o) / 2, 0);
   lv_obj_set_style_transform_scale(o, down ? 243 : 256, 0);
-}
-
-// ---------------------------------------------------------------------------
-// Welle: Kreis wächst vom Finger aus und blendet aus
-// ---------------------------------------------------------------------------
-inline void ripple_cb(void *var, int32_t v) {  // v = 0..1000
-  auto *o = (lv_obj_t *) var;
-  auto c = (intptr_t) lv_obj_get_user_data(o);
-  int32_t cx = (c >> 16) & 0xFFFF, cy = c & 0xFFFF;
-  int32_t d = 24 + v * 300 / 1000;
-  lv_obj_set_size(o, d, d);
-  lv_obj_set_pos(o, cx - d / 2, cy - d / 2);
-  lv_obj_set_style_bg_opa(o, 90 - v * 90 / 1000, 0);
-}
-
-inline void ripple_done(lv_anim_t *a) { lv_obj_delete_async((lv_obj_t *) a->var); }
-
-inline void ripple(lv_obj_t *tile, uint32_t color) {
-  if (!dbg_ripple)
-    return;
-  lv_indev_t *indev = lv_indev_active();
-  if (indev == nullptr)
-    return;
-  lv_point_t p;
-  lv_indev_get_point(indev, &p);
-  lv_area_t area;
-  lv_obj_get_coords(tile, &area);
-  int32_t cx = LV_CLAMP(0, p.x - area.x1, 0x7FFF), cy = LV_CLAMP(0, p.y - area.y1, 0x7FFF);
-
-  lv_obj_t *o = lv_obj_create(tile);
-  lv_obj_remove_style_all(o);
-  lv_obj_add_flag(o, LV_OBJ_FLAG_IGNORE_LAYOUT);
-  lv_obj_remove_flag(o, LV_OBJ_FLAG_CLICKABLE);
-  lv_obj_set_style_radius(o, LV_RADIUS_CIRCLE, 0);
-  lv_obj_set_style_bg_color(o, lv_color_hex(color), 0);
-  lv_obj_set_user_data(o, (void *) (intptr_t) ((cx << 16) | cy));
-  ripple_cb(o, 0);
-
-  lv_anim_t a;
-  lv_anim_init(&a);
-  lv_anim_set_var(&a, o);
-  lv_anim_set_exec_cb(&a, ripple_cb);
-  lv_anim_set_values(&a, 0, 1000);
-  lv_anim_set_duration(&a, 550);
-  lv_anim_set_path_cb(&a, lv_anim_path_ease_out);
-  lv_anim_set_completed_cb(&a, ripple_done);
-  lv_anim_start(&a);
 }
 
 // ---------------------------------------------------------------------------
@@ -158,76 +105,9 @@ inline lv_obj_t *light_count_num = nullptr;   // "2"
 inline lv_obj_t *light_count_text = nullptr;  // " von 4 an"
 inline lv_obj_t *sleep_lights = nullptr;      // Ruhemodus: "2 Lichter an"
 
-// Lichtschein: einmal als Bild vorberechnet und beim Schalten nur ein- und
-// ausgeblendet. Ein weicher Schatten an der Kachel müsste in jedem Bild der
-// Animation neu gezeichnet werden – das ist auf dem ESP32-S3 zu langsam.
-constexpr int32_t GLOW_M = 12;  // Rand um die Kachel (Schatten 34 px, Spread -6 → 11 px)
-
-struct GlowBuf {
-  int32_t w, h;
-  lv_draw_buf_t *buf;
-};
-inline std::vector<GlowBuf> glow_bufs;  // ein Bild je Kachelgröße
-inline std::map<lv_obj_t *, lv_obj_t *> glows;
-
-inline lv_draw_buf_t *glow_buf(lv_obj_t *tile) {
-  int32_t w = lv_obj_get_width(tile), h = lv_obj_get_height(tile);
-  for (auto &g : glow_bufs)
-    if (g.w == w && g.h == h)
-      return g.buf;
-  lv_draw_buf_t *buf = lv_draw_buf_create(w + 2 * GLOW_M, h + 2 * GLOW_M, LV_COLOR_FORMAT_ARGB8888, LV_STRIDE_AUTO);
-  if (buf == nullptr)
-    return nullptr;
-  lv_draw_buf_clear(buf, nullptr);
-  // In einem unsichtbaren Canvas den Schatten der Kachel einmal malen
-  lv_obj_t *cv = lv_canvas_create(lv_layer_top());
-  lv_obj_add_flag(cv, LV_OBJ_FLAG_HIDDEN);
-  lv_canvas_set_draw_buf(cv, buf);
-  lv_layer_t layer;
-  lv_canvas_init_layer(cv, &layer);
-  lv_draw_rect_dsc_t d;
-  lv_draw_rect_dsc_init(&d);
-  d.bg_opa = LV_OPA_TRANSP;
-  d.border_width = 0;
-  d.radius = lv_obj_get_style_radius(tile, LV_PART_MAIN);
-  d.shadow_color = lv_color_hex(0xFFB547);
-  d.shadow_width = 34;
-  d.shadow_spread = -6;
-  d.shadow_opa = LV_OPA_COVER;
-  lv_area_t a = {GLOW_M, GLOW_M, GLOW_M + w - 1, GLOW_M + h - 1};
-  lv_draw_rect(&layer, &d, &a);
-  lv_canvas_finish_layer(cv, &layer);
-  lv_obj_delete(cv);
-  glow_bufs.push_back({w, h, buf});
-  return buf;
-}
-
-// Schein-Objekt hinter der Kachel (beim ersten Einschalten angelegt)
-inline lv_obj_t *glow_of(lv_obj_t *tile) {
-  auto it = glows.find(tile);
-  if (it != glows.end())
-    return it->second;
-  lv_obj_t *parent = lv_obj_get_parent(tile);
-  lv_obj_update_layout(parent);
-  lv_draw_buf_t *buf = glow_buf(tile);
-  if (buf == nullptr)
-    return glows[tile] = nullptr;
-  lv_obj_t *g = lv_canvas_create(parent);
-  lv_canvas_set_draw_buf(g, buf);
-  lv_obj_add_flag(g, LV_OBJ_FLAG_IGNORE_LAYOUT);
-  lv_obj_remove_flag(g, LV_OBJ_FLAG_CLICKABLE);
-  lv_obj_set_pos(g, lv_obj_get_x(tile) - GLOW_M, lv_obj_get_y(tile) - GLOW_M);
-  lv_obj_move_to_index(g, lv_obj_get_index(tile));  // direkt unter die Kachel
-  lv_obj_set_style_image_opa(g, 0, 0);
-  return glows[tile] = g;
-}
-
 inline void light_paint(lv_obj_t *tile, int32_t v) {
   lv_obj_set_style_bg_color(tile, mix(CARD, AMBER_BG, v), 0);
   lv_obj_set_style_border_color(tile, mix(LINE, AMBER_LINE, v), 0);
-  lv_obj_t *g = (v > 0 && dbg_glow) ? glow_of(tile) : (glows.count(tile) ? glows[tile] : nullptr);
-  if (g != nullptr)
-    lv_obj_set_style_image_opa(g, dbg_glow ? v * 95 / 255 : 0, 0);
   lv_obj_t *bubble = child(tile, 0);
   lv_obj_set_style_bg_color(bubble, mix(CARD2, AMBER, v), 0);
   lv_obj_set_style_text_color(child(bubble, 0), mix(DIM, AMBER_DEEP, v), 0);
@@ -856,14 +736,6 @@ inline void fps_update() {
   fps_frames = fps_busy = fps_flush = 0;
   fps_px = 0;
   fps_window = lv_tick_get();
-}
-
-// Test-Schalter anwenden
-inline void dbg_apply() {
-  for (auto &it : lights) {
-    lv_obj_set_style_clip_corner(it.first, dbg_clip, 0);
-    light_paint(it.first, it.second.level);
-  }
 }
 
 }  // namespace panel

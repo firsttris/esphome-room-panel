@@ -69,12 +69,6 @@ lvgl:
   # ------------------------------------------------------------------
   top_layer:
     widgets:
-      # Aktiviert LVGL-Canvas für den vorberechneten Lichtschein (panel.h)
-      - canvas:
-          id: canvas_enable
-          width: 1
-          height: 1
-          hidden: true
       # --- Kopfzeile ---
       - obj:
           id: header
