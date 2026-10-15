@@ -31,7 +31,7 @@ jobs:
       - name: Install tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends libsdl2-dev xvfb imagemagick xdotool
+          sudo apt-get install -y --no-install-recommends libsdl2-dev xvfb imagemagick xdotool ffmpeg
           pip install esphome
 
       - name: Cache ESPHome toolchain
@@ -43,7 +43,8 @@ jobs:
 
       - name: Render
         run: |
-          for room in mila eg schlafzimmer; do
+          GIF=1 sh preview/render.sh mila.yml
+          for room in eg schlafzimmer; do
             sh preview/render.sh "$room.yml"
           done
 
@@ -51,9 +52,9 @@ jobs:
         run: |
           for room in mila eg schlafzimmer; do
             mkdir -p "docs/$room"
-            for shot in licht rolllaeden klima heizung; do
-              if [ -f "preview/shots/$room/$shot.png" ]; then
-                cp "preview/shots/$room/$shot.png" "docs/$room/"
+            for shot in licht.png rolllaeden.png klima.png heizung.png demo.gif; do
+              if [ -f "preview/shots/$room/$shot" ]; then
+                cp "preview/shots/$room/$shot" "docs/$room/"
               fi
             done
           done

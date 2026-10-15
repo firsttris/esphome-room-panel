@@ -69,6 +69,9 @@ script:
   - id: update_clock
     then:
       - lambda: |-
+          // In der PC-Vorschau bleibt die Uhrzeit aus den Beispielwerten stehen
+          if (${'true' if preview | default(false) else 'false'})
+            return;
           auto t = id(ha_time).now();
           if (!t.is_valid())
             return;

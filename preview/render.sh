@@ -8,7 +8,7 @@ OUT=preview/shots/$NAME
 mkdir -p "$OUT"
 # Vorschau-Konfiguration: Hardware durch SDL ersetzen, Beispielwerte dazu
 sed -e 's#device: !include base/device.yml#device: !include preview/sdl.yml\n  demo: !include preview/demo-'"$NAME"'.yml#' \
-    -e 's#^\(  device_name: .*\)$#\1-preview#' "$ROOM" > .preview.yml
+    -e 's#^\(  device_name: .*\)$#\1-preview\n  preview: true#' "$ROOM" > .preview.yml
 esphome compile .preview.yml
 DEV=$(sed -n 's/^  device_name: //p' "$ROOM")-preview
 BIN=.esphome/build/$DEV/.pioenvs/$DEV/program
@@ -35,4 +35,27 @@ if grep -q '^  tabs: 4' "$ROOM"; then
 else
   tap 238 439; sleep 1.2; shot rolllaeden
   tap 387 439; sleep 1.2; shot klima
+fi
+
+# Optional (GIF=1): kurzer Rundgang als animiertes GIF für das README.
+# Koordinaten passen zu mila.yml (4 Lichter, 6 Rollläden, Klima).
+if [ -n "$GIF" ]; then
+  kill $APP 2>/dev/null || true
+  sleep 0.5
+  "$BIN" >/dev/null 2>&1 &
+  APP=$!
+  sleep 3
+  ffmpeg -loglevel error -y -f x11grab -draw_mouse 0 -framerate 20 -video_size 480x480 -i :99 -t 9.5 "$OUT/demo.mp4" &
+  REC=$!
+  sleep 0.8; tap 355 180    # Licht "Mitte" an: Glühen, Welle, Pendeln
+  sleep 1.6; tap 124 180    # Licht "Links" aus
+  sleep 1.6; tap 238 439    # Reiter Rollläden
+  sleep 1.2; tap 205 177    # "Dachfenster links" runter: Behang fährt
+  sleep 1.5; tap 387 439    # Reiter Klima
+  sleep 1.0; tap 435 119    # Modus Kühlen: Farbe wechselt, Lüfter dreht
+  wait $REC
+  ffmpeg -loglevel error -y -i "$OUT/demo.mp4" \
+    -vf "fps=15,split[a][b];[a]palettegen=max_colors=128:stats_mode=diff[p];[b][p]paletteuse=dither=none:diff_mode=rectangle" \
+    "$OUT/demo.gif"
+  rm -f "$OUT/demo.mp4"
 fi
