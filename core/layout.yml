@@ -450,6 +450,30 @@ lvgl:
                         action: homeassistant.turn_off
                         data:
                           entity_id: "${all_lights}"
+              - button:
+                  id: lights_all_on
+                  align_to:
+                    id: lights_all_off
+                    align: OUT_LEFT_MID
+                    x: -8
+                  styles: pill
+                  width: SIZE_CONTENT
+                  layout:
+                    type: flex
+                    flex_flow: ROW
+                    flex_align_cross: CENTER
+                    flex_align_track: CENTER
+                  widgets:
+                    - label: { text: "\U000F1253", text_font: icons_18 }
+                    - label: { text: "Alle an" }
+                  on_click:
+                    - lambda: |-
+                        for (auto &it : panel::lights)
+                          panel::light_set(it.first, true);
+                    - homeassistant.action:
+                        action: homeassistant.turn_on
+                        data:
+                          entity_id: "${all_lights}"
 
     - id: page_covers
       styles: page_style

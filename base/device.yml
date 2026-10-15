@@ -6,6 +6,6 @@ packages:
   network: !include network.yml
   backlight: !include backlight.yml
 
-# Keine Drehung per Software: Das Panel wird so eingebaut, dass das Bild
-# aufrecht steht. (Eine Drehung um 90° müsste der ESP32-S3 für jedes Bild
-# Pixel für Pixel umrechnen, das kostet 20–50 ms pro Bild.)
+lvgl:
+  # Einbaulage des Displays
+  rotation: 270

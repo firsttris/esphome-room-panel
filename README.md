@@ -73,7 +73,7 @@ Also on board:
 |---|---|
 | **Display** | [Guition ESP32-S3-4848S040](https://devices.esphome.io/devices/guition-esp32-s3-4848s040/): ESP32-S3, 16 MB flash, octal PSRAM, 4″ IPS 480 × 480, capacitive touch (GT911) |
 | **Where to buy** | AliExpress or Amazon, search for "ESP32-S3-4848S040" |
-| **Mounting** | made for a European 86 mm wall box, power via USB-C. The picture is not rotated in software (that would cost 20–50 ms per frame on the ESP32-S3), so mount the panel the way the picture stands upright |
+| **Mounting** | made for a European 86 mm wall box, power via USB-C. |
 | **Firmware size** | about 16 % flash and 36 % RAM, so there is plenty of room for more |
 
 ## 🚀 Getting started
@@ -181,7 +181,6 @@ preview/            SDL preview, sample values, screenshot, GIF and social image
 | An icon is empty | The glyph is missing in `core/fonts.yml` for that size |
 | Air conditioner reacts late | Daikin Onecta polls every 10 min and allows 200 calls a day; a local ESP at the indoor unit (S21 port) removes the limit |
 | Text looks jagged | Update to the current version: fonts use `bpp: 4` |
-| Picture is sideways | Turn the panel a quarter turn in the wall box. If that is not possible, add `lvgl: rotation: 90` (or 270) to `base/device.yml`; animations get slower |
 | Is it smooth? | The FPS line at the top shows frames per second, time per frame and copy time; hide it with `show_fps: "false"` |
 
 ## 🔗 Related projects

@@ -96,6 +96,7 @@ font:
       "\U000F0335",  # lightbulb
       "\U000F0336",  # lightbulb-outline
       "\U000F12CD",  # lightbulb-group-off
+      "\U000F1253",  # lightbulb-group
       "\U000F0795",  # arrow-collapse-up
       "\U000F0792",  # arrow-collapse-down
     ]
