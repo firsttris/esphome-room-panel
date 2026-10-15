@@ -83,7 +83,13 @@ inline void anim(void *var, lv_anim_exec_xcb_t cb, int32_t from, int32_t to, uin
 // ---------------------------------------------------------------------------
 // Drück-Effekt: Kachel schrumpft kurz um 5 %
 // ---------------------------------------------------------------------------
+// Test-Schalter (vorübergehend, in HA beim Gerät): Effekte einzeln abschalten,
+// um auf dem Gerät zu messen, was beim Lichtschalten Zeit kostet
+inline bool dbg_ripple = true, dbg_press = true, dbg_clip = true, dbg_glow = true;
+
 inline void press(lv_obj_t *o, bool down) {
+  if (!dbg_press)
+    down = false;
   lv_obj_set_style_transform_pivot_x(o, lv_obj_get_width(o) / 2, 0);
   lv_obj_set_style_transform_pivot_y(o, lv_obj_get_height(o) / 2, 0);
   lv_obj_set_style_transform_scale(o, down ? 243 : 256, 0);
@@ -105,6 +111,8 @@ inline void ripple_cb(void *var, int32_t v) {  // v = 0..1000
 inline void ripple_done(lv_anim_t *a) { lv_obj_delete_async((lv_obj_t *) a->var); }
 
 inline void ripple(lv_obj_t *tile, uint32_t color) {
+  if (!dbg_ripple)
+    return;
   lv_indev_t *indev = lv_indev_active();
   if (indev == nullptr)
     return;
@@ -217,9 +225,9 @@ inline lv_obj_t *glow_of(lv_obj_t *tile) {
 inline void light_paint(lv_obj_t *tile, int32_t v) {
   lv_obj_set_style_bg_color(tile, mix(CARD, AMBER_BG, v), 0);
   lv_obj_set_style_border_color(tile, mix(LINE, AMBER_LINE, v), 0);
-  lv_obj_t *g = v > 0 ? glow_of(tile) : (glows.count(tile) ? glows[tile] : nullptr);
+  lv_obj_t *g = (v > 0 && dbg_glow) ? glow_of(tile) : (glows.count(tile) ? glows[tile] : nullptr);
   if (g != nullptr)
-    lv_obj_set_style_image_opa(g, v * 95 / 255, 0);
+    lv_obj_set_style_image_opa(g, dbg_glow ? v * 95 / 255 : 0, 0);
   lv_obj_t *bubble = child(tile, 0);
   lv_obj_set_style_bg_color(bubble, mix(CARD2, AMBER, v), 0);
   lv_obj_set_style_text_color(child(bubble, 0), mix(DIM, AMBER_DEEP, v), 0);
@@ -848,6 +856,14 @@ inline void fps_update() {
   fps_frames = fps_busy = fps_flush = 0;
   fps_px = 0;
   fps_window = lv_tick_get();
+}
+
+// Test-Schalter anwenden
+inline void dbg_apply() {
+  for (auto &it : lights) {
+    lv_obj_set_style_clip_corner(it.first, dbg_clip, 0);
+    light_paint(it.first, it.second.level);
+  }
 }
 
 }  // namespace panel
