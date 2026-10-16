@@ -53,7 +53,7 @@ All screenshots are rendered from the firmware in CI on every change, with sampl
 | Page | What you get |
 |---|---|
 | 💡 **Lights** | Tiles that turn warm when switched on, and ceiling lamps that swing like a pendant lamp; "all off" |
-| 🪟 **Roller shutters** | Cards with a small window whose shutter moves live while the real one travels; ▲ ■ ▼ and "all up / all down"; tall cards for up to 4 shutters |
+| 🪟 **Roller shutters** | Cards with a small window whose shutter moves live while the real one travels, with a sunny sky by day and moon and stars at night; ▲ ■ ▼ and "all up / all down"; tall cards for up to 4 shutters |
 | ❄️ **Air conditioning** | Dial (18–32 °C), six modes with their own colour, fan speed with a spinning fan |
 | 🔥 **Heating** | Dial for a thermostat, schedule / manual / off, boost, "heating now" |
 
@@ -110,6 +110,7 @@ substitutions:
   room_icon: "\U000F02DC"                       # home
   room_climate: climate.living_room_thermostat  # temperature and humidity in the header
   weather_entity: weather.forecast_home
+  # sun_entity: sun.sun                         # day/night sky in the shutter windows (default)
   all_lights: switch.ceiling, switch.sideboard
   all_covers: cover.window, cover.patio_door
 

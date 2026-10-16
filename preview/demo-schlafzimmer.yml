@@ -23,6 +23,7 @@ esphome:
             id(rl_vici_tisch_ha_position).publish_state(100);
             id(rl_vici_hinten_ha_state).publish_state("open");
             id(rl_vici_hinten_ha_position).publish_state(100);
+            id(sun_state).publish_state("below_horizon");
             id(ac_ha_mode).publish_state("cool");
             id(ac_ha_target).publish_state(21.0);
             id(ac_ha_fan).publish_state("quiet");

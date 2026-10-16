@@ -19,7 +19,7 @@ lvgl:
             scrollable: false
             clickable: false
             widgets:
-              # 0: Fenster (Kind 0 = Sonne, Kind 1 = Behang)
+              # 0: Fenster (Kind 0 = Himmel mit Sonne/Mond/Sternen, Kind 1 = Behang)
               - obj:
                   x: 11
                   y: ${11 if tall | default(false) else 10}
@@ -36,19 +36,55 @@ lvgl:
                   scrollable: false
                   clickable: false
                   widgets:
+                    # Himmel: 0 = Sonne, 1 = Mond, ab 2 = Sterne (panel.h blendet Tag/Nacht über)
                     - obj:
-                        align: TOP_RIGHT
-                        x: -3
-                        y: 4
-                        width: 10
-                        height: 10
-                        radius: 5
-                        bg_color: 0xFFE38A
-                        border_width: 0
-                        shadow_color: 0xFFE38A
-                        shadow_width: 8
-                        shadow_opa: 70%
+                        width: 100%
+                        height: 100%
+                        styles: box
+                        scrollable: false
                         clickable: false
+                        widgets:
+                          - obj:
+                              align: TOP_RIGHT
+                              x: -3
+                              y: 4
+                              width: 10
+                              height: 10
+                              radius: 5
+                              bg_color: 0xFFE38A
+                              border_width: 0
+                              shadow_color: 0xFFE38A
+                              shadow_width: 8
+                              shadow_opa: 70%
+                              clickable: false
+                          # Mondsichel: heller Kreis, ein zweiter in Himmelfarbe schneidet die Sichel aus
+                          - obj:
+                              align: TOP_RIGHT
+                              x: -3
+                              y: 4
+                              width: 10
+                              height: 10
+                              radius: 5
+                              bg_color: 0xF1F4FF
+                              border_width: 0
+                              shadow_color: 0xC9D6FF
+                              shadow_width: 8
+                              shadow_opa: 40%
+                              opa: 0%
+                              pad_all: 0
+                              clip_corner: true
+                              scrollable: false
+                              clickable: false
+                              widgets:
+                                - obj: { x: -4, y: -3, width: 10, height: 10, radius: 5, border_width: 0, bg_color: 0x0B1530, clickable: false }
+                          - obj: { x: 10%, y: 7%, width: 2, height: 2, radius: 1, border_width: 0, bg_color: 0xFFFFFF, opa: 0%, clickable: false }
+                          - obj: { x: 42%, y: 16%, width: 2, height: 2, radius: 1, border_width: 0, bg_color: 0xDDE6FF, opa: 0%, clickable: false }
+                          - obj: { x: 16%, y: 33%, width: 2, height: 2, radius: 1, border_width: 0, bg_color: 0xFFFFFF, opa: 0%, clickable: false }
+                          - obj: { x: 70%, y: 30%, width: 2, height: 2, radius: 1, border_width: 0, bg_color: 0xDDE6FF, opa: 0%, clickable: false }
+                          - obj: { x: 40%, y: 50%, width: 2, height: 2, radius: 1, border_width: 0, bg_color: 0xFFFFFF, opa: 0%, clickable: false }
+                          - obj: { x: 80%, y: 56%, width: 2, height: 2, radius: 1, border_width: 0, bg_color: 0xDDE6FF, opa: 0%, clickable: false }
+                          - obj: { x: 10%, y: 70%, width: 2, height: 2, radius: 1, border_width: 0, bg_color: 0xFFFFFF, opa: 0%, clickable: false }
+                          - obj: { x: 58%, y: 82%, width: 2, height: 2, radius: 1, border_width: 0, bg_color: 0xDDE6FF, opa: 0%, clickable: false }
                     - obj:
                         x: 0
                         y: 0
