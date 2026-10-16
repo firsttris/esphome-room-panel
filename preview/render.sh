@@ -20,7 +20,17 @@ sleep 1
 "$BIN" >/dev/null 2>&1 &
 APP=$!
 trap 'kill $APP $XVFB 2>/dev/null || true' EXIT
-sleep 4
+# Warten, bis das Fenster etwas zeigt (in CI dauert der Start mal länger als 4 s)
+wait_window() {
+  i=0
+  while [ "$(import -window root -colorspace gray -format '%[fx:mean>0.02]' info:)" != 1 ]; do
+    i=$((i + 1))
+    [ $i -ge 60 ] && { echo "Vorschau zeigt nach 30 s nichts" >&2; exit 1; }
+    sleep 0.5
+  done
+}
+wait_window
+sleep 3
 tap() { xdotool mousemove "$1" "$2" mousedown 1 sleep 0.2 mouseup 1; }
 shot() { import -window root "$OUT/$1.png"; }
 shot licht
@@ -45,7 +55,9 @@ if [ -n "$GIF" ]; then
   sleep 0.5
   "$BIN" >/dev/null 2>&1 &
   APP=$!
-  sleep 3
+  sleep 0.5
+  wait_window
+  sleep 2
   ffmpeg -loglevel error -y -f x11grab -draw_mouse 0 -framerate 20 -video_size 480x480 -i :99 -t 9.5 "$OUT/demo.mp4" &
   REC=$!
   sleep 0.8; tap 355 180    # Licht "Mitte" an: Glühen, Welle, Pendeln
