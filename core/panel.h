@@ -219,7 +219,7 @@ inline bool light_is_on(lv_obj_t *tile) { return lights[tile].on; }
 
 // ---------------------------------------------------------------------------
 // Rollläden
-// Karte: 0 = Fenster (Kind 0: Sonne, Kind 1: Behang), 1 = Name, 2 = Position,
+// Karte: 0 = Fenster (Kind 0: Himmel, Kind 1: Behang), 1 = Name, 2 = Position,
 //        3 = Fahrt-Hinweis, 4 = Knopfleiste (hoch, stopp, runter)
 // ---------------------------------------------------------------------------
 // Innenhöhe des Fensters (64 px normal, mehr bei hohen Karten)
@@ -269,11 +269,47 @@ inline void covers_changed() {
   }
 }
 
+// Himmel im Fenster: tagsüber blau mit Sonne, nachts dunkel mit Mond und Sternen.
+// Himmel-Kinder: 0 = Sonne, 1 = Mond (Kind 0: Ausschnitt der Sichel), ab 2 = Sterne
+constexpr uint32_t DAY_TOP = 0x78C3FF, DAY_BOTTOM = 0xD9F0FF;
+constexpr uint32_t NIGHT_TOP = 0x0B1530, NIGHT_BOTTOM = 0x2A3D66;
+inline int32_t sky_night = 0;  // 0 = Tag, 255 = Nacht
+inline bool sky_known = false;
+
+inline void sky_paint(lv_obj_t *card) {
+  lv_obj_t *window = child(card, 0);
+  lv_color_t top = mix(DAY_TOP, NIGHT_TOP, sky_night);
+  lv_obj_set_style_bg_color(window, top, 0);
+  lv_obj_set_style_bg_grad_color(window, mix(DAY_BOTTOM, NIGHT_BOTTOM, sky_night), 0);
+  lv_obj_t *sky = child(window, 0);
+  lv_obj_set_style_opa(child(sky, 0), 255 - sky_night, 0);
+  lv_obj_set_style_bg_color(child(child(sky, 1), 0), top, 0);
+  uint32_t n = lv_obj_get_child_count(sky);
+  for (uint32_t i = 1; i < n; i++)
+    lv_obj_set_style_opa(child(sky, i), sky_night, 0);
+}
+
+inline void sky_cb(void *, int32_t v) {
+  sky_night = v;
+  for (auto &it : covers)
+    sky_paint(it.first);
+}
+
+// Zustand von sun.sun: "above_horizon" / "below_horizon"
+inline void sky_set(const std::string &state) {
+  if (state != "above_horizon" && state != "below_horizon")
+    return;
+  int32_t target = state == "below_horizon" ? 255 : 0;
+  anim(&sky_night, sky_cb, sky_night, target, sky_known ? 1500 : 0);
+  sky_known = true;
+}
+
 inline void cover_register(lv_obj_t *card, uint32_t travel_s) {
   if (covers.find(card) == covers.end()) {
     CoverState s;
     s.travel_ms = travel_s * 1000;
     covers[card] = s;
+    sky_paint(card);
   }
 }
 

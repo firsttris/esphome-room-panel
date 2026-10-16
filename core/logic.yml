@@ -119,3 +119,12 @@ sensor:
       - lambda: |-
           panel::set_int(id(chip_outdoor), x, "°");
           panel::set_int(id(sleep_outdoor), x, "°");
+
+text_sensor:
+  # Tag oder Nacht für den Himmel in den Rollladen-Fenstern
+  - platform: homeassistant
+    id: sun_state
+    entity_id: ${sun_entity | default('sun.sun')}
+    internal: true
+    on_value:
+      - lambda: panel::sky_set(x);
