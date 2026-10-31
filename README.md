@@ -80,7 +80,7 @@ Also on board:
 
 | Requirement | |
 |---|---|
-| **ESPHome** | 2026.7 or newer, locally or as a container (see [`docker-compose.yml`](docker-compose.yml)) |
+| **ESPHome** | 2026.7 or newer, locally or as a container (see [`docker-compose.yml`](docker-compose.yml)). CI builds with the release pinned in [`requirements.txt`](requirements.txt) (`pip install -r requirements.txt`), and `docker-compose.yml` runs the same one; Renovate updates both |
 | **Home Assistant** | ESPHome integration; tick **"Allow the device to perform Home Assistant actions"** for the panel |
 
 ```bash
